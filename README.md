@@ -41,6 +41,16 @@ docker run --rm -p 8000:8000 domain-security-analyzer
 
 The local runner binds to `127.0.0.1`. The Docker image listens on `0.0.0.0` inside the container; Docker's published port controls host exposure. For network or public deployment, review [deployment and privacy notes](docs/DEPLOYMENT.md) and put an authenticated, rate-limited proxy in front of the app.
 
+To publish the image to GitHub Container Registry (GHCR), first authenticate with a GitHub token that has package write access, then tag and push it:
+
+```bash
+docker login ghcr.io --username Kanishkchahar
+docker build -t ghcr.io/kanishkchahar/domain-security-analyzer:2.2.0 .
+docker push ghcr.io/kanishkchahar/domain-security-analyzer:2.2.0
+```
+
+Docker prompts for the token during `docker login`; do not put it directly in shell history. The registry package visibility can be changed in GitHub after the first push.
+
 ## What it checks
 
 - **DNS:** A, AAAA, MX, NS, TXT, CNAME, SOA, and CAA records; zone-apex discovery; selected DNS configuration checks.

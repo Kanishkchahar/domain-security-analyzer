@@ -4,8 +4,17 @@
 docker-compose*.yml
 venv
 .venv
+node_modules
 __pycache__
 *.py[cod]
 .pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+coverage.xml
+build
+dist
+*.egg-info
 *.log
 .env
+.env.*

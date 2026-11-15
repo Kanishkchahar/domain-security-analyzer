@@ -274,13 +274,23 @@ function closeShortcutsModal() {
 }
 
 // ── Toast & Clipboard Helpers ─────────────────────────────────
-function showToast(message) {
+function showToast(message, tone = "info") {
   const toast = document.getElementById("toast");
   if (!toast) return;
+  const tones = ["info", "success", "warning", "danger"];
+  const safeTone = tones.includes(tone) ? tone : "info";
+  const icon = safeTone === "success"
+    ? '<circle cx="7" cy="7" r="6"/><path d="m4.5 7 1.7 1.7L9.8 5"/>'
+    : safeTone === "danger"
+      ? '<circle cx="7" cy="7" r="6"/><path d="M7 4v3.5M7 10v.2"/>'
+      : safeTone === "warning"
+        ? '<path d="M6.1 1.8a1 1 0 0 1 1.8 0l5 9.1a1 1 0 0 1-.9 1.5H2a1 1 0 0 1-.9-1.5z"/><path d="M7 4.5v3.2M7 10v.2"/>'
+        : '<circle cx="7" cy="7" r="6"/><path d="M7 6.5v3M7 4.3v.2"/>';
+  toast.classList.remove(...tones.map((item) => `toast--${item}`));
+  toast.classList.add(`toast--${safeTone}`);
   toast.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="7" cy="7" r="6" stroke="#63B995" stroke-width="1.5"/>
-      <path d="M4.5 7l2 2 3-3" stroke="#63B995" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      ${icon}
     </svg>
     <span>${escapeHtml(message)}</span>
   `;
@@ -305,7 +315,7 @@ function copyToClipboard(text, btnElement) {
         btnElement.innerHTML = originalHtml;
       }, 1800);
     }
-    showToast("Copied to clipboard!");
+    showToast("Copied to clipboard!", "success");
   };
 
   const fallbackCopy = () => {
@@ -321,7 +331,7 @@ function copyToClipboard(text, btnElement) {
       onCopied();
     } catch (err) {
       console.error("Clipboard copy error:", err);
-      showToast("Failed to copy");
+      showToast("Failed to copy", "danger");
     }
   };
 
@@ -573,7 +583,7 @@ if (downloadZoneBtn) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast("BIND zone file downloaded!");
+    showToast("BIND zone file downloaded!", "success");
   });
 }
 
@@ -640,7 +650,7 @@ async function runAnalysis() {
     }
   } catch (err) {
     if (err.name === "AbortError") {
-      showToast("Scan stopped. The server is cancelling the disconnected request.");
+      showToast("Scan stopped. The server is cancelling the request.", "warning");
     } else showError(err instanceof TypeError
       ? "Network error — could not reach the server. Check your connection and try again."
       : (err.message || "The scan could not be completed. Please try again."));
@@ -686,7 +696,7 @@ async function runBatchAnalysis(domains) {
     for (const row of rows) if (row.status === "complete") saveRecentSearch(row.domain);
     renderBatchDashboard(rows);
   } catch (err) {
-    if (err.name === "AbortError") showToast("Comparison scan stopped.");
+    if (err.name === "AbortError") showToast("Comparison scan stopped.", "warning");
     else showError(err instanceof TypeError
       ? "Network error — could not reach the server. Check your connection and try again."
       : (err.message || "The comparison could not be completed."));
@@ -781,7 +791,7 @@ function setLoading(on) {
 
   if (on) {
     loadingBar.style.display = "flex";
-    loadingStatusText.textContent = "Analyzing DNS records and security posture…";
+    loadingStatusText.textContent = "Analyzing domain security signals…";
     loadingStartedAt = performance.now();
     if (loadingElapsedText) loadingElapsedText.textContent = "0:00 elapsed";
     clearInterval(loadingInterval);
@@ -2754,7 +2764,7 @@ function renderSubdomains(subData) {
       anchor.download = `subdomains-${currentDomain}.csv`;
       anchor.click();
       URL.revokeObjectURL(url);
-      showToast("Subdomain inventory exported as CSV.");
+    showToast("Subdomain inventory exported as CSV.", "success");
     };
   }
   if (subBadge) {
@@ -3147,7 +3157,7 @@ async function recheckAfterFix(fix, button) {
       <p><strong>New findings (${remaining.length})</strong></p><ul>${describe(remaining)}</ul>
       <p class="dns-cache-note">DNS cache note: ${observedTtl ? `the previous ${escapeHtml(fix.record_type)} TTL was ${Number(observedTtl)} seconds. Recursive resolvers may continue serving cached answers for up to that TTL after a change.` : `the previous ${escapeHtml(fix.record_type)} TTL was unavailable, so the remaining DNS cache delay cannot be estimated.`}</p>`;
     remediationList.prepend(note);
-    showToast("Fresh scan complete. Compare resolved and new findings above the fix list.");
+    showToast("Fresh scan complete. Compare resolved and new findings above the fix list.", "success");
   } catch (error) {
     showToast(error.message || "Fresh scan failed.", "danger");
     button.disabled = false;
@@ -3493,7 +3503,7 @@ if (exportJsonBtn) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast("Scan JSON exported successfully!");
+  showToast("Scan JSON exported successfully!", "success");
   });
 }
 
@@ -3563,7 +3573,7 @@ window.addEventListener("offline", () => {
   showToast("Network disconnected — offline mode active.");
 });
 window.addEventListener("online", () => {
-  showToast("Internet connection restored.");
+  showToast("Internet connection restored.", "success");
 });
 
 // ── Network Scope & Port Scan Handlers ────────────────────────

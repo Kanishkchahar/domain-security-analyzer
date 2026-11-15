@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 22 22'><circle cx='11' cy='11' r='10' stroke='%23F38020' stroke-width='1.5' fill='none'/><path d='M11 1C11 1 7 6 7 11s4 10 4 10' stroke='%23F38020' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M11 1C11 1 15 6 15 11s-4 10-4 10' stroke='%23F38020' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M1.5 11h19' stroke='%23F38020' stroke-width='1.5' stroke-linecap='round'/></svg>" />
 
-  <link rel="stylesheet" href="/static/style.css?v=2.2.0.7" />
+  <link rel="stylesheet" href="/static/style.css?v=2.2.0.18" />
 </head>
 <body>
 
@@ -51,11 +51,9 @@
 
     <!-- ── Hero / Input ── -->
     <section class="hero" aria-labelledby="hero-title">
-      <h1 class="hero-title" id="hero-title">DNS Lookup<br>&amp; Analyzer</h1>
+      <h1 class="hero-title" id="hero-title">Domain Security<br>Analyzer</h1>
       <p class="hero-sub">
-        Enter one domain or a comma/newline-separated set of domains to compare DNS records and security checks,
-        and analyze email authentication (SPF, DMARC, DKIM)
-        — all concurrently.
+        Assess DNS, email security, TLS, subdomains, and authorized network exposure. Scan one domain or compare up to eight.
       </p>
 
       <div class="input-row" role="search">
@@ -79,7 +77,7 @@
           id="analyze-btn"
           class="btn-analyze"
           type="button"
-          aria-label="Run DNS analysis"
+            aria-label="Run domain security analysis"
         >
           <div class="spinner" aria-hidden="true"></div>
           <span class="btn-text">Analyze</span>
@@ -120,7 +118,7 @@
       <div id="loading-bar" class="loading-bar" style="display:none;" role="status" aria-live="polite" aria-atomic="true">
         <div class="loading-indicator" aria-hidden="true"><span></span></div>
         <div class="loading-copy">
-          <span id="loading-status-text">Analyzing DNS records and security posture…</span>
+          <span id="loading-status-text">Analyzing domain security signals…</span>
           <span class="loading-detail">Checking DNS, email, TLS, and selected web settings. Some checks may be inconclusive if a service does not respond.</span>
           <span id="loading-elapsed" class="loading-elapsed" aria-hidden="true">0:00 elapsed</span>
         </div>
@@ -143,6 +141,33 @@
         </svg>
         <span id="error-msg"></span>
       </div>
+    </section>
+
+    <section class="idle-overview" aria-labelledby="idle-overview-title">
+      <div class="idle-overview-heading">
+        <p class="idle-eyebrow">DOMAIN SECURITY · AT A GLANCE</p>
+        <h2 id="idle-overview-title">One scan. A clearer security picture.</h2>
+        <p>Review the public signals that shape your domain’s security posture, then open the findings for evidence and next steps.</p>
+      </div>
+      <div class="idle-capability-grid">
+        <article class="idle-capability">
+          <span class="idle-capability-index">01</span>
+          <div><h3>DNS &amp; infrastructure</h3><p>Records, delegation, DNSSEC, and reachability.</p></div>
+        </article>
+        <article class="idle-capability">
+          <span class="idle-capability-index">02</span>
+          <div><h3>Email protection</h3><p>SPF, DMARC, and discovered DKIM selectors.</p></div>
+        </article>
+        <article class="idle-capability">
+          <span class="idle-capability-index">03</span>
+          <div><h3>Web &amp; TLS</h3><p>HTTPS, certificate, and selected security headers.</p></div>
+        </article>
+        <article class="idle-capability">
+          <span class="idle-capability-index">04</span>
+          <div><h3>Exposure &amp; next steps</h3><p>Subdomain inventory, findings, and practical fix guidance.</p></div>
+        </article>
+      </div>
+      <p class="idle-scope-note"><span aria-hidden="true"></span> Public checks run first. Optional active network checks are clearly scoped and require authorization.</p>
     </section>
 
     <section id="multi-domain-dashboard" class="multi-domain-dashboard" aria-labelledby="multi-domain-title" aria-live="polite">
@@ -211,7 +236,7 @@
         <div class="bento-cockpit">
           <!-- Left Hero: Overall Security Posture (spans 2 rows) -->
           <div class="bento-hero" id="bento-hero">
-            <span class="bento-section-label">DNS &amp; Email Posture</span>
+            <span class="bento-section-label">Domain Security Posture</span>
             <div class="bento-ring-area">
               <div class="bento-ring-wrap">
                 <svg class="score-ring-svg bento-ring-svg" width="140" height="140" viewBox="0 0 140 140">
@@ -446,7 +471,7 @@
           <div class="network-scope-header">
             <div>
               <h2 class="section-title"><svg class="heading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m16 8 5-5m-3 0h3v3"/></svg>Network Scope &amp; Web Exposure</h2>
-              <p class="remediation-sub">Choose a bounded check for targets you own or are authorized to assess. Each option has a different network impact.</p>
+              <p class="remediation-sub">Start with a safe DNS or website-path check. Active service scans are optional and require explicit permission.</p>
             </div>
             <div class="scope-guard-badge">
               <span class="pill pill-ok">🛡️ SSRF Guard Enforced</span>
@@ -463,11 +488,11 @@
             </div>
             <div class="scope-box-header">
               <label for="list-scan-input" class="scope-label">
-                <span>Targets to check</span>
+                <span>1. Targets to check</span>
                 <span class="scope-hint">Enter hostnames or public IPs, separated by commas or new lines.</span>
               </label>
             </div>
-            <textarea id="list-scan-input" class="scope-textarea" rows="2" placeholder="example.com&#10;www.example.com&#10;93.184.216.34" aria-describedby="scope-safety-note"></textarea>
+            <textarea id="list-scan-input" class="scope-textarea" rows="3" placeholder="example.com&#10;www.example.com&#10;93.184.216.34" aria-describedby="scope-safety-note"></textarea>
             <p class="scope-safety-note" id="scope-safety-note">Private, loopback, link-local, and other non-public addresses are blocked. Use only targets you are authorized to assess.</p>
 
             <div class="scope-readiness" id="scope-readiness" hidden>
@@ -483,7 +508,8 @@
               </details>
             </div>
             
-            <div class="scope-actions-bar">
+              <div class="scope-actions-bar">
+                <h3 class="scope-actions-heading">2. Choose a check</h3>
               <div class="scope-scan-options">
                 <article class="scope-scan-option">
                   <div class="scope-option-heading">
@@ -503,13 +529,7 @@
                     <h3>Check common website paths</h3>
                     <span class="scope-option-limit">Up to 5 targets</span>
                   </div>
-                  <p>Checks 7 common HTTPS paths and same-host redirects. Optional extended mode checks up to 96 curated paths on 2 targets; it never crawls or follows off-host redirects.</p>
-                  <label class="scope-confirm-label" for="wide-path-confirm">
-                    <input type="checkbox" id="wide-path-confirm" class="scope-checkbox" />
-                    <span id="wide-path-confirm-label">Use the extended list (requires server enablement and authorization).</span>
-                  </label>
-                  <input type="password" id="wide-path-auth-token" class="port-scan-auth-input" placeholder="Extended scan key (if configured)" aria-label="Extended scan API key" autocomplete="off" />
-                  <p class="scope-option-note">If disabled by the server, the standard 7-path check remains available.</p>
+                  <p>Checks 7 common HTTPS paths and same-host redirects. This does not scan ports or crawl the site.</p>
                   <button class="btn btn-secondary" id="btn-run-path-scan" type="button">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                       <path d="M2 3h12v10H2zM2 6h12M5 3v3" stroke-linejoin="round"/>
@@ -517,13 +537,26 @@
                     </svg>
                     <span>Check website paths</span>
                   </button>
-                  <button class="btn btn-secondary" id="btn-run-ffuf-scan" type="button" style="margin-top:6px;">
-                    <span>Run ffuf directory discovery</span>
-                  </button>
+                  <details class="scope-advanced-settings">
+                    <summary><strong>Extended directory checks</strong><span>Optional · requires server authorization</span></summary>
+                    <div class="scope-advanced-content">
+                      <label class="scope-confirm-label" for="wide-path-confirm">
+                        <input type="checkbox" id="wide-path-confirm" class="scope-checkbox" />
+                        <span id="wide-path-confirm-label">Use the extended list (requires server enablement and authorization).</span>
+                      </label>
+                      <input type="password" id="wide-path-auth-token" class="port-scan-auth-input" placeholder="Extended scan key (if configured)" aria-label="Extended scan API key" autocomplete="off" />
+                      <p class="scope-option-note">The extended list checks up to 96 curated paths on 2 targets. It never crawls or follows off-host redirects.</p>
+                      <button class="btn btn-secondary" id="btn-run-ffuf-scan" type="button">
+                        <span>Run directory discovery</span>
+                      </button>
+                    </div>
+                  </details>
                 </article>
               </div>
 
-              <div class="scope-auth-group">
+              <details class="scope-advanced-settings scope-port-settings">
+                <summary><strong>Advanced: identify exposed services</strong><span>Active TCP connections · requires permission</span></summary>
+                <div class="scope-auth-group">
                 <div class="port-scan-copy">
                   <strong>Identify exposed services</strong>
                   <span>Checks only the first target above. This makes active TCP connections and requires your permission plus server authorization.</span>
@@ -571,7 +604,8 @@
                     <span>Verify ports</span>
                   </button>
                 </div>
-              </div>
+                </div>
+              </details>
             </div>
           </div>
 
@@ -725,6 +759,6 @@
   <!-- Toast notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="/static/app.js?v=2.2.0.6"></script>
+  <script src="/static/app.js?v=2.2.0.7"></script>
 </body>
 </html>
