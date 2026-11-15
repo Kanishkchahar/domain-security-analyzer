@@ -104,6 +104,7 @@
         <button class="chip" type="button" data-domain="github.com">github.com</button>
         <button class="chip" type="button" data-domain="boot.dev">boot.dev</button>
       </div>
+      <p class="scan-cache-note">Recent scans are reused for up to 60 seconds, so repeat requests return quickly.</p>
 
       <!-- Recent searches row (populated via localStorage) -->
       <div id="recent-chips-container" class="recent-chips" style="display:none;" aria-label="Recently analyzed domains">
@@ -117,6 +118,7 @@
         <div class="loading-indicator" aria-hidden="true"><span></span></div>
         <div class="loading-copy">
           <span id="loading-status-text">Analyzing DNS records and security posture…</span>
+          <span class="loading-detail">Checking DNS, email, TLS, and selected web settings. Some checks may be inconclusive if a service does not respond.</span>
           <span id="loading-elapsed" class="loading-elapsed" aria-hidden="true">0:00 elapsed</span>
         </div>
         <button id="stop-scan-btn" class="btn-stop-scan" type="button" hidden>
@@ -324,6 +326,16 @@
             </div>
           </div>
         </div>
+        <section class="priority-actions" aria-labelledby="priority-actions-heading">
+          <div class="priority-actions-header">
+            <div>
+              <h2 id="priority-actions-heading">Start here</h2>
+              <p id="priority-actions-summary">Highest priority findings from this scan.</p>
+            </div>
+            <button class="btn btn-secondary" id="review-all-findings" type="button">Review all findings</button>
+          </div>
+          <ol id="priority-actions-list" class="priority-actions-list"></ol>
+        </section>
         <div class="overview-secondary-grid">
           <section class="overview-detail-card" aria-labelledby="scan-coverage-heading">
             <div class="overview-detail-header">

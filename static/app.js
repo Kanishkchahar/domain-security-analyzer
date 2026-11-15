@@ -158,6 +158,12 @@ function apiErrorMessage(response, payload, fallback) {
   if (response.status === 401) {
     return "This server requires a valid API key. Open “API access” above the domain field and enter the key.";
   }
+  if (response.status === 429 && response.headers.get("Retry-After")) {
+    const seconds = Number.parseInt(response.headers.get("Retry-After"), 10);
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return `This domain was scanned recently. Try a fresh scan again in ${seconds} seconds.`;
+    }
+  }
   return payload?.detail || fallback;
 }
 
@@ -614,9 +620,9 @@ async function runAnalysis() {
       method: "POST",
       signal: scanController.signal,
       headers: { "Content-Type": "application/json" },
-      // Always bypass the short server cache so each user-triggered scan
-      // re-runs DNS, TLS, and passive security checks against current data.
-      body: JSON.stringify({ domain, force_refresh: true }),
+      // Reuse a recent result to keep repeat scans responsive and avoid the
+      // server's per-target cooldown. The API still supports explicit refreshes.
+      body: JSON.stringify({ domain, force_refresh: false }),
     });
 
     const responseText = await res.text();
@@ -672,7 +678,7 @@ async function runBatchAnalysis(domains) {
       method: "POST",
       signal: scanController.signal,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ domains, force_refresh: true }),
+      body: JSON.stringify({ domains, force_refresh: false }),
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(apiErrorMessage(response, payload, "Multi-domain analysis failed."));
@@ -913,6 +919,7 @@ function renderResults(data, recheckContext = null) {
 
   // Bento Grid Security Posture Cockpit
   renderBentoCockpit(data, recheckContext?.previousScore ?? null);
+  renderPriorityActions(data);
   renderScanCoverage(data.coverage || []);
   renderScanHistory(data);
 
@@ -973,6 +980,50 @@ function renderResults(data, recheckContext = null) {
   document.body.classList.add("results-active");
   results.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+function renderPriorityActions(data) {
+  const list = document.getElementById("priority-actions-list");
+  const summary = document.getElementById("priority-actions-summary");
+  const reviewButton = document.getElementById("review-all-findings");
+  if (!list || !summary) return;
+
+  const rank = { error: 0, warning: 1 };
+  const actionable = (data.findings || [])
+    .filter((finding) => Object.hasOwn(rank, finding.severity))
+    .sort((a, b) => rank[a.severity] - rank[b.severity]);
+  list.replaceChildren();
+
+  if (actionable.length) {
+    summary.textContent = `${data.summary?.errors || 0} errors and ${data.summary?.warnings || 0} warnings. Start with these findings.`;
+    actionable.slice(0, 3).forEach((finding) => {
+      const item = document.createElement("li");
+      const label = document.createElement("span");
+      label.className = `priority-severity priority-${finding.severity}`;
+      label.textContent = finding.severity === "error" ? "Error" : "Warning";
+      const message = document.createElement("span");
+      message.className = "priority-message";
+      message.textContent = finding.message || "Review this finding.";
+      item.append(label, message);
+      list.appendChild(item);
+    });
+    if (reviewButton) reviewButton.hidden = false;
+  } else {
+    const inconclusive = Number(data.summary?.inconclusive || 0);
+    summary.textContent = inconclusive
+      ? `No errors or warnings were confirmed. ${inconclusive} check${inconclusive === 1 ? " was" : "s were"} inconclusive; review scan coverage.`
+      : "No errors or warnings were found in the completed checks.";
+    const item = document.createElement("li");
+    item.className = "priority-empty";
+    item.textContent = inconclusive ? "Some results could not be verified." : "No immediate actions from this scan.";
+    list.appendChild(item);
+    if (reviewButton) reviewButton.hidden = !(data.findings || []).length;
+  }
+}
+
+document.getElementById("review-all-findings")?.addEventListener("click", () => {
+  switchSegmentTab("tab-findings");
+  document.getElementById("findings-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 function renderDnsAuthorityAudit(posture) {
   const root = document.getElementById("dns-authority-audit");
@@ -1120,6 +1171,7 @@ if (clearScanHistoryButton) {
 
 // ── Tab Badges & Overview Snapshots ───────────────────────────
 function updateTabBadges(data) {
+  const wide = data.scan_capabilities?.wide_directory_scan || {};
   // 1. Email badge & snapshot
   const emailBadge = document.getElementById("tab-badge-email");
   const emailPill = document.getElementById("overview-email-pill");

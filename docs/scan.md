@@ -147,4 +147,4 @@ Other modules use additional states such as `partial`, `unavailable`, `blocked`,
 
 Scans use current public DNS and network responses. DNS propagation, resolver behavior, provider outages, firewalls, geography, and configuration changes can affect results. Review evidence, timestamps, coverage, and limitations before making operational changes.
 
-The product does not currently provide RDAP/WHOIS expiry checks, server-side scan history, scheduled monitoring, or alert delivery. Dashboard scan history is stored in the current browser only. The main scan also does not send email or perform exploit attempts.
+The product does not currently provide server-side scan history, scheduled monitoring, or alert delivery. Dashboard scan history is stored in the current browser only. The main scan also does not send email or perform exploit attempts.

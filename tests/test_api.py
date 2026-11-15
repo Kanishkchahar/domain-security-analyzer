@@ -100,6 +100,8 @@ def test_local_hostname_lookups_are_cached_but_configured_names_stay_dynamic(mon
         ("post", "/api/analyze", {"domain": "example.com"}),
         ("get", "/api/report/example.com", None),
         ("post", "/api/network/list-scan", {"targets": ["example.com"]}),
+        ("post", "/api/email/dkim-selectors", {"domain": "example.com", "selectors": ["selector1"]}),
+        ("get", "/api/subdomains/example.com", None),
     ],
 )
 async def test_scan_api_returns_401_when_api_keys_are_configured(monkeypatch, method, path, payload):
@@ -134,6 +136,7 @@ async def test_target_cooldown_returns_429(monkeypatch):
     with pytest.raises(HTTPException) as limited:
         _enforce_target_cooldown("example.com")
     assert limited.value.status_code == 429
+    assert int(limited.value.headers["Retry-After"]) > 0
     _TARGET_LAST_SCAN.clear()
 
 
@@ -422,6 +425,21 @@ class TestAPIEndpoints:
         assert ready.status_code == 200
         assert ready.json() == {"status": "ready"}
 
+    async def test_full_health_check_accepts_local_mode_and_uses_app_static_directory(self, monkeypatch, tmp_path):
+        monkeypatch.delenv("DNS_ANALYZER_API_KEYS", raising=False)
+        monkeypatch.chdir(tmp_path)
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get("/health/full")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "healthy"
+        assert data["errors"] == []
+        assert data["config"]["api_keys_configured"] is False
+        assert any("authentication is disabled" in warning for warning in data["warnings"])
+        assert not any("Missing static assets" in warning for warning in data["warnings"])
+
     async def test_readiness_probe_fails_when_required_frontend_asset_is_missing(self, tmp_path, monkeypatch):
         monkeypatch.setattr("app.main.STATIC_DIR", tmp_path)
         transport = ASGITransport(app=app)
@@ -574,7 +592,7 @@ class TestAPIEndpoints:
         assert data["active_port_scan"]["enabled"] is True
         assert data["active_port_scan"]["authorized"] is True
         assert data["active_port_scan"]["max_wide_ports"] == 100
-        assert data["wide_directory_scan"]["path_count"] == 64
+        assert data["wide_directory_scan"]["path_count"] == 96
         assert "capabilities-secret-sentinel" not in resp.text
         assert "example.com" not in resp.text
 

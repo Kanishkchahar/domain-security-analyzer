@@ -272,7 +272,12 @@ def _enforce_target_cooldown(target: str, check_type: str = "analysis") -> None:
     key = f"{check_type}:{target.strip().lower().rstrip('.')}"
     last_scan = _TARGET_LAST_SCAN.get(key)
     if last_scan is not None and now - last_scan < cooldown:
-        raise HTTPException(status_code=429, detail="This target was scanned recently. Retry after the cooldown.")
+        retry_after = max(1, int(cooldown - (now - last_scan) + 0.999))
+        raise HTTPException(
+            status_code=429,
+            detail="This target was scanned recently. Retry after the cooldown.",
+            headers={"Retry-After": str(retry_after)},
+        )
     if len(_TARGET_LAST_SCAN) >= 2048:
         expired = [name for name, timestamp in _TARGET_LAST_SCAN.items() if now - timestamp >= cooldown]
         for name in expired:
@@ -685,6 +690,78 @@ async def health_ready() -> JSONResponse:
         return JSONResponse(status_code=503, content={"status": "not_ready", "missing_assets": missing})
     return JSONResponse(content={"status": "ready"})
 
+@app.get("/health/full", include_in_schema=False)
+async def health_full() -> dict[str, Any]:
+    """Full health check: validates configuration and runtime state."""
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    # Check API keys
+    api_keys = [key.strip() for key in os.environ.get("DNS_ANALYZER_API_KEYS", "").split(",") if key.strip()]
+    if not api_keys:
+        warnings.append("API key authentication is disabled; use an authenticated proxy before public deployment.")
+
+    # Check rate limit configs
+    rate_limit = os.environ.get("DNS_ANALYZER_RATE_LIMIT_PER_MIN")
+    if not rate_limit:
+        warnings.append("DNS_ANALYZER_RATE_LIMIT_PER_MIN not set, using default 60/min")
+    else:
+        try:
+            rate = int(rate_limit)
+            if rate < 1 or rate > 1000:
+                warnings.append(f"DNS_ANALYZER_RATE_LIMIT_PER_MIN={rate} is outside reasonable range (1-1000)")
+        except ValueError:
+            warnings.append(f"DNS_ANALYZER_RATE_LIMIT_PER_MIN='{rate_limit}' is not a valid integer")
+
+    # Check expensive rate limit
+    expensive_rate = os.environ.get("DNS_ANALYZER_EXPENSIVE_RATE_LIMIT_PER_MIN")
+    if not expensive_rate:
+        warnings.append("DNS_ANALYZER_EXPENSIVE_RATE_LIMIT_PER_MIN not set, using default 10/min")
+    else:
+        try:
+            rate = int(expensive_rate)
+            if rate < 1 or rate > 100:
+                warnings.append(f"DNS_ANALYZER_EXPENSIVE_RATE_LIMIT_PER_MIN={rate} is outside reasonable range (1-100)")
+        except ValueError:
+            warnings.append(f"DNS_ANALYZER_EXPENSIVE_RATE_LIMIT_PER_MIN='{expensive_rate}' is not a valid integer")
+
+    # Check target cooldown
+    cooldown_str = os.environ.get("DNS_ANALYZER_TARGET_COOLDOWN_SECONDS", "10")
+    try:
+        cooldown = int(cooldown_str)
+        if cooldown < 1 or cooldown > 300:
+            warnings.append(f"DNS_ANALYZER_TARGET_COOLDOWN_SECONDS={cooldown} is outside reasonable range (1-300s)")
+    except ValueError:
+        warnings.append(f"DNS_ANALYZER_TARGET_COOLDOWN_SECONDS='{cooldown_str}' is not a valid integer, using default 10s")
+
+    # Check scan concurrency
+    semaphore_count = 8  # Hardcoded
+    warnings.append(f"SCAN_SEMAPHORE={semaphore_count} concurrent scans (hardcoded)")
+
+    # Check static assets
+    required_assets = (STATIC_DIR / "index.html", STATIC_DIR / "app.js", STATIC_DIR / "style.css")
+    missing_assets = [a.name for a in required_assets if not a.is_file()]
+    if missing_assets:
+        warnings.append(f"Missing static assets: {', '.join(missing_assets)}")
+
+    # Check work budget defaults
+    budget = ScanWorkBudget()
+    warnings.append(f"Work budget: DNS={budget.dns_remaining}, HTTP={budget.http_remaining}")
+
+    status = "healthy" if not errors else "critical"
+    return {
+        "status": status,
+        "config": {
+            "api_keys_configured": bool(api_keys),
+            "rate_limit_per_min": rate_limit or "default 60",
+            "expensive_rate_limit_per_min": expensive_rate or "default 10",
+            "target_cooldown_seconds": cooldown_str or "default 10",
+            "scan_semaphore": semaphore_count,
+        },
+        "errors": errors,
+        "warnings": warnings,
+    }
+
 @app.post("/api/analyze", response_model=AnalyzeResponse)
 async def api_analyze(req: AnalyzeRequest, request: Request) -> AnalyzeResponse:
     require_api_key(request)
@@ -836,6 +913,7 @@ async def api_network_ffuf_path_scan(req: FfufPathRequest, request: Request) -> 
 @app.post("/api/email/dkim-selectors")
 async def api_dkim_selector_check(req: DkimSelectorRequest, request: Request) -> dict[str, Any]:
     """Check user-supplied DKIM selectors for the analyzed domain."""
+    require_api_key(request)
     _enforce_rate_limit(request)
     async with _scan_slot():
         import dns.asyncresolver
@@ -894,6 +972,7 @@ async def api_network_port_scan(req: PortScanRequest, request: Request) -> dict[
 @app.get("/api/subdomains/{domain}")
 async def api_subdomains(domain: str, request: Request) -> dict[str, Any]:
     """Query Certificate Transparency logs for passive subdomain discovery."""
+    require_api_key(request)
     _enforce_rate_limit(request)
     try:
         req = AnalyzeRequest(domain=domain)

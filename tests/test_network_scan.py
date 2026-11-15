@@ -248,7 +248,7 @@ class TestNetworkScan:
         assert defaults["active_port_scan"]["enabled"] is False
         assert defaults["active_port_scan"]["authorized"] is False
         assert defaults["wide_directory_scan"]["enabled"] is False
-        assert defaults["wide_directory_scan"]["path_count"] == len(WIDE_SCAN_PATHS) == 64
+        assert defaults["wide_directory_scan"]["path_count"] == len(WIDE_SCAN_PATHS) == 96
 
         monkeypatch.setenv("ENABLE_ACTIVE_PORT_SCAN", "true")
         monkeypatch.setenv("PORT_SCAN_API_KEY", "secret-token-123")

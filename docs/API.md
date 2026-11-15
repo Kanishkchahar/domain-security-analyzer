@@ -10,7 +10,7 @@ The API is served by the same FastAPI app as the dashboard. JSON routes accept a
 {"domain":"example.com","force_refresh":false}
 ```
 
-`force_refresh` bypasses the short in-process scan cache. The response includes DNS records, findings and stable codes, scan coverage, scores, email and security checks, subdomains, and remediation drafts. A successful HTTP response can still contain partial or inconclusive checks; inspect `coverage`, `findings`, and module statuses.
+`force_refresh` bypasses the 60-second in-process scan cache and starts a new scan. The dashboard reuses recent results so repeat clicks return promptly; API callers requesting a forced scan can receive `429` during the configured per-target cooldown. The response includes DNS records, findings and stable codes, scan coverage, scores, email and security checks, subdomains, and remediation drafts. A successful HTTP response can still contain partial or inconclusive checks; inspect `coverage`, `findings`, and module statuses.
 
 NS and MX record entries include the compatible `resolves` boolean plus additive `resolution_status` (`resolved`, `unresolved`, or `inconclusive`) and `address_families` (`A`, `AAAA`, or both). IPv6-only hosts count as resolved. If either family lookup fails and neither returns an address, the result is inconclusive rather than an absent-host finding.
 
@@ -39,6 +39,8 @@ This trimmed response excerpt shows the backward-compatible response shape; real
 ```
 
 ## Other routes
+
+When `DNS_ANALYZER_API_KEYS` is configured, scan and report routes require `Authorization: Bearer <key>`, including custom DKIM checks and passive subdomain discovery. The grade badge route remains public so it can be embedded; it only serves a result already in the process cache.
 
 | Method and path | Request / response | Purpose |
 |---|---|---|

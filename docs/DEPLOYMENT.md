@@ -3,7 +3,7 @@
 ## Safe defaults
 
 - `bash run.sh` binds to `127.0.0.1:8000`. Use `DNS_ANALYZER_HOST` to change the bind address. The Docker image listens on `0.0.0.0` inside its network namespace; use the published port mapping to control host exposure.
-- Public deployments should sit behind an authenticated, rate-limited reverse proxy. The application does not provide user accounts or authentication for general scan endpoints.
+- Public deployments should sit behind an authenticated, rate-limited reverse proxy. Without `DNS_ANALYZER_API_KEYS`, general scan endpoints are unauthenticated; configuring keys protects the scan, report, and network API routes documented below.
 - Active TCP port scanning is disabled by default. Enable it only when you have an authorization policy and approved target scope.
 - The DNS, CT, and HTTP checks make outbound requests. Parent-child delegation checks send bounded UDP/TCP DNS queries to public parent authoritative nameserver addresses discovered through DNS. Use the tool only for domains and hosts you are authorized to assess.
 
@@ -21,7 +21,7 @@
 | `CERTSPOTTER_API_KEY` | unset | Optional SSLMate Cert Spotter API bearer token for higher CT query availability. |
 | `TRUST_REVERSE_PROXY` | `false` | Read `X-Forwarded-For` for rate limiting. Enable only when direct access to the app is blocked and the proxy chain is trusted. |
 | `TRUSTED_PROXY_COUNT` | `1` | With proxy trust enabled, select this many valid addresses from the right of `X-Forwarded-For`. Must match the trusted proxy hops represented in the header; insufficient valid entries fall back to the socket peer. |
-| `DNS_ANALYZER_API_KEYS` | unset | Optional comma-separated bearer keys required by scan, report, and `/api/network/*` endpoints. Enter the key under the dashboard's “API access” control; it is held for the current browser tab only. |
+| `DNS_ANALYZER_API_KEYS` | unset | Optional comma-separated bearer keys required by scan, report, and `/api/network/*` endpoints, including custom DKIM and passive subdomain scans. Enter the key under the dashboard's “API access” control; it is held for the current browser tab only. |
 | `DNS_ANALYZER_RATE_LIMIT_PER_MIN` | `60` | Per-client rate limit for ordinary API requests. Loopback requests retain a minimum allowance of 120 per minute. |
 | `DNS_ANALYZER_EXPENSIVE_RATE_LIMIT_PER_MIN` | `10` | Per-client limit for full scans, reports, batch scans, and network diagnostics. |
 | `DNS_ANALYZER_TARGET_COOLDOWN_SECONDS` | `10` | Minimum interval between repeated checks of the same target and check type, regardless of client. |
