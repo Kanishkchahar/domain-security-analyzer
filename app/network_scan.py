@@ -959,7 +959,7 @@ async def run_ffuf_scan(
         "-timeout", str(timeout), "-maxtime", "50", "-noninteractive", "-json",
     ]
     discovered: list[dict[str, Any]] = []
-    with tempfile.TemporaryDirectory(prefix="dns-analyzer-ffuf-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="domain-security-analyzer-ffuf-") as temp_dir:
         wordlist_path = Path(temp_dir) / "paths.txt"
         wordlist_path.write_text("\n".join(clean_words) + "\n", encoding="utf-8")
         ffuf_cmd[2] = str(wordlist_path)

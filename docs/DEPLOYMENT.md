@@ -26,7 +26,7 @@
 | `DNS_ANALYZER_EXPENSIVE_RATE_LIMIT_PER_MIN` | `10` | Per-client limit for full scans, reports, batch scans, and network diagnostics. |
 | `DNS_ANALYZER_TARGET_COOLDOWN_SECONDS` | `10` | Minimum interval between repeated checks of the same target and check type, regardless of client. |
 | `DNS_ANALYZER_BLOCKED_TARGETS` | unset | Comma-separated local hostnames or addresses that must not be scanned. The server's current hostname and FQDN are blocked automatically. |
-| `DNS_ANALYZER_DOCUMENTATION_URL` | placeholder URL | Contact/documentation link placed in the scanner User-Agent. |
+| `DNS_ANALYZER_DOCUMENTATION_URL` | project scan guide | Contact/documentation link placed in the scanner User-Agent. |
 | `ENABLE_DNSSEC_CHAIN_VALIDATION` | `false` | Enable additional informational DNSSEC chain evidence. It does not affect the score. |
 
 For active port scans, the dashboard sends `PORT_SCAN_API_KEY` in `X-Port-Scan-Token`; the older request-body `auth_token` field remains temporarily supported. Extended path scans use `X-Wide-Path-Token`. When global API-key protection is enabled, its key is sent separately in `Authorization: Bearer …`.
@@ -53,7 +53,7 @@ docker run --rm -p 127.0.0.1:8000:8000 \
   -e ENABLE_ACTIVE_PORT_SCAN=true \
   -e PORT_SCAN_ALLOWED_DOMAINS=your-domain.example \
   -e PORT_SCAN_API_KEY='choose-a-long-secret' \
-  dns-analyzer
+  domain-security-analyzer
 ```
 
 The 96-path option is separate. To enable it, set `ENABLE_WIDE_DIRECTORY_SCAN=true`, configure `WIDE_PATH_SCAN_ALLOWED_DOMAINS` and/or `WIDE_PATH_SCAN_API_KEY`, restart the server, and provide the configured key in the extended-scan field. Leave the extended-list checkbox off to use the standard seven-path check without wide-scan authorization. Never use `*` or a domain you do not control in the allowlist.
@@ -62,7 +62,7 @@ The dashboard reads `GET /api/network/capabilities` on load, so the Network Scop
 
 ### Public deployment threat model
 
-DNS Analyzer makes DNS and bounded HTTP or TCP requests on behalf of its caller. A public instance can therefore be abused as a scanning proxy. Keep it behind a trusted reverse proxy, enable `DNS_ANALYZER_API_KEYS`, set conservative rate and target cooldown limits, and configure `DNS_ANALYZER_BLOCKED_TARGETS` with any public aliases or addresses that route back to the deployment. Special-use suffixes such as `.local`, `.internal`, `.onion`, and `.localhost` are rejected. Optional active network checks still require their own explicit authorization controls.
+Domain Security Analyzer makes DNS and bounded HTTP or TCP requests on behalf of its caller. A public instance can therefore be abused as a scanning proxy. Keep it behind a trusted reverse proxy, enable `DNS_ANALYZER_API_KEYS`, set conservative rate and target cooldown limits, and configure `DNS_ANALYZER_BLOCKED_TARGETS` with any public aliases or addresses that route back to the deployment. Special-use suffixes such as `.local`, `.internal`, `.onion`, and `.localhost` are rejected. Optional active network checks still require their own explicit authorization controls.
 
 For a single Nginx proxy, set `TRUST_REVERSE_PROXY=true` and `TRUSTED_PROXY_COUNT=1`, and use `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`. If Cloudflare is in front of Nginx and both hops are represented in the header, set the count to `2`. Restrict network access so clients cannot reach the application directly; otherwise they can forge this header.
 
@@ -93,8 +93,8 @@ The scan concurrency limit is eight requests per process, with a bounded queue w
 The default Docker build runs the test suite in an isolated test stage before assembling the runtime image. The runtime image does not contain pytest or development tools. To run the test stage directly, use `docker build --target test .`. The image includes Nmap and ffuf for optional service identification and authorized path discovery. Build and run with:
 
 ```bash
-docker build -t dns-analyzer .
-docker run --rm -p 8000:8000 dns-analyzer
+docker build -t domain-security-analyzer .
+docker run --rm -p 8000:8000 domain-security-analyzer
 ```
 
 The container publishes port 8000. Follow the same proxy and authorization guidance before exposing it outside a trusted local network.

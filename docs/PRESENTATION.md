@@ -1,10 +1,10 @@
-# DNS Analyzer presentation guide
+# Domain Security Analyzer presentation guide
 
 Use this guide for a short product demo or technical walkthrough. Live scan results vary; avoid promising a particular grade or provider response.
 
 ## Short introduction
 
-> DNS Analyzer brings DNS, email authentication, selected DNSSEC, TLS, and web checks into one dashboard. It reports what completed, what could not be verified, and provides remediation drafts for review. It is a diagnostic aid, not a penetration test or proof that a domain is secure.
+> Domain Security Analyzer brings DNS, email authentication, selected DNSSEC, TLS/web, subdomain inventory, and bounded network checks into one dashboard. It reports what completed, what could not be verified, and provides remediation drafts for review. It is a diagnostic aid, not a penetration test or proof that a domain is secure.
 
 ## Two-minute demo
 
@@ -102,9 +102,9 @@ No. Findings identify configuration signals and should be checked against the do
 ```bash
 bash run.sh
 bash run.sh --test
-./venv/bin/dns-analyzer example.com
-./venv/bin/dns-analyzer example.com --json
-./venv/bin/dns-analyzer example.com --sarif
+./venv/bin/domain-security-analyzer example.com
+./venv/bin/domain-security-analyzer example.com --json
+./venv/bin/domain-security-analyzer example.com --sarif
 ```
 
 For endpoint examples, see the [API guide](API.md). For deployment settings and outbound requests, see [deployment and privacy](DEPLOYMENT.md).

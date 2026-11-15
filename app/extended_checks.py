@@ -147,7 +147,7 @@ async def _smtp_leaf_certificate(host: str, address: str) -> bytes | None:
     try:
         reader, writer = await asyncio.wait_for(asyncio.open_connection(address, 25), timeout=3.0)
         await _smtp_reply(reader)
-        writer.write(b"EHLO dns-analyzer.invalid\r\n")
+        writer.write(b"EHLO domain-security-analyzer.invalid\r\n")
         await writer.drain()
         capabilities = await _smtp_reply(reader)
         if not any("STARTTLS" in line.upper() for line in capabilities):
@@ -380,7 +380,7 @@ async def _probe_mx(host: str, resolver: Any) -> dict[str, Any]:
         try:
             reader, writer = await asyncio.wait_for(asyncio.open_connection(address, 25), timeout=3.0)
             greeting = await _smtp_reply(reader)
-            writer.write(b"EHLO dns-analyzer.invalid\r\n")
+            writer.write(b"EHLO domain-security-analyzer.invalid\r\n")
             await writer.drain()
             capabilities = await _smtp_reply(reader)
             advertises = any("STARTTLS" in line.upper() for line in capabilities)

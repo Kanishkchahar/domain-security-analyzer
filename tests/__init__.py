@@ -1,1 +1,1 @@
-"""Test suite for DNS Analyzer v2."""
+"""Test suite for Domain Security Analyzer."""

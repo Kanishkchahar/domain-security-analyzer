@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DNS Analyzer</title>
-  <meta name="description" content="Analyze DNS records and detect misconfigurations for any domain." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 22 22'><circle cx='11' cy='11' r='10' stroke='%2365B9E8' stroke-width='1.5' fill='none'/><path d='M11 1C11 1 7 6 7 11s4 10 4 10' stroke='%2365B9E8' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M11 1C11 1 15 6 15 11s-4 10-4 10' stroke='%2365B9E8' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M1.5 11h19' stroke='%2365B9E8' stroke-width='1.5' stroke-linecap='round'/></svg>" />
+  <title>Domain Security Analyzer</title>
+  <meta name="description" content="Assess DNS, email authentication, DNSSEC, TLS and web security, subdomain inventory, and authorized network exposure for a domain." />
+  <meta name="application-name" content="Domain Security Analyzer" />
+  <meta property="og:title" content="Domain Security Analyzer" />
+  <meta property="og:description" content="Assess DNS, email authentication, DNSSEC, TLS and web security, subdomain inventory, and authorized network exposure for a domain." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 22 22'><circle cx='11' cy='11' r='10' stroke='%2359C3D1' stroke-width='1.5' fill='none'/><path d='M11 1C11 1 7 6 7 11s4 10 4 10' stroke='%2359C3D1' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M11 1C11 1 15 6 15 11s-4 10-4 10' stroke='%2359C3D1' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M1.5 11h19' stroke='%2359C3D1' stroke-width='1.5' stroke-linecap='round'/></svg>" />
 
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css?v=2.2.0.6" />
 </head>
 <body>
 
@@ -16,18 +20,17 @@
 
   <header class="app-header" role="banner">
     <div class="header-inner">
-      <a class="logo" href="/" aria-label="DNS Analyzer home">
+      <a class="logo" href="/" aria-label="Domain Security Analyzer home">
         <!-- DNS icon -->
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="11" cy="11" r="10" stroke="#65B9E8" stroke-width="1.5"/>
-          <path d="M11 1C11 1 7 6 7 11s4 10 4 10" stroke="#65B9E8" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M11 1C11 1 15 6 15 11s-4 10-4 10" stroke="#65B9E8" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M1.5 11h19" stroke="#65B9E8" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M2 7h18M2 15h18" stroke="#65B9E8" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+          <circle cx="11" cy="11" r="10" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M11 1C11 1 7 6 7 11s4 10 4 10" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M11 1C11 1 15 6 15 11s-4 10-4 10" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M1.5 11h19" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M2 7h18M2 15h18" stroke="var(--accent)" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
         </svg>
-        DNS Analyzer
+        <span class="logo-text">Domain Security Analyzer</span>
       </a>
-      <span class="logo-tagline">v2</span>
       <div class="header-actions">
         <button id="theme-toggle" class="header-action-btn theme-toggle" type="button" aria-label="Switch to light theme" title="Theme: system">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2m0 10v2M1 8h2m10 0h2M3.05 3.05l1.42 1.42m7.06 7.06 1.42 1.42m0-9.9-1.42 1.42m-7.06 7.06-1.42 1.42"/></svg><span>Theme</span>
@@ -192,12 +195,15 @@
 
       <!-- Segmented Navigation Bar -->
       <nav class="segment-nav" id="segment-nav" role="tablist" aria-label="Analysis report sections">
-        <button class="segment-tab active" type="button" role="tab" id="tab-overview" data-target="overview" aria-controls="panel-overview" aria-selected="true"><span>Overview &amp; Findings</span><span class="tab-badge findings-badge" id="tab-badge-findings">0</span></button>
-        <button class="segment-tab" type="button" role="tab" id="tab-records" data-target="dns" aria-controls="panel-records" aria-selected="false"><span>DNS &amp; Infrastructure</span><span class="tab-badge" id="tab-badge-records">8</span></button>
-        <button class="segment-tab" type="button" role="tab" id="tab-email" data-target="email" aria-controls="panel-email" aria-selected="false"><span>Email Security</span><span class="tab-badge" id="tab-badge-email">--</span></button>
+        <button class="segment-tab active" type="button" role="tab" id="tab-overview" data-target="overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+        <button class="segment-tab" type="button" role="tab" id="tab-findings" data-target="findings" aria-controls="panel-findings" aria-selected="false"><span>Findings</span><span class="tab-badge" id="tab-badge-findings">0</span></button>
+        <button class="segment-tab" type="button" role="tab" id="tab-records" data-target="dns" aria-controls="panel-records" aria-selected="false"><span>DNS</span><span class="tab-badge" id="tab-badge-records">8</span></button>
+        <button class="segment-tab" type="button" role="tab" id="tab-email" data-target="email" aria-controls="panel-email" aria-selected="false"><span>Email</span><span class="tab-badge" id="tab-badge-email">--</span></button>
+        <button class="segment-tab" type="button" role="tab" id="tab-threats" data-target="security" aria-controls="panel-threats" aria-selected="false"><span>Security</span><span class="tab-badge" id="tab-badge-threats">Audit</span></button>
         <button class="segment-tab" type="button" role="tab" id="tab-tls" data-target="web" aria-controls="panel-tls" aria-selected="false"><span>Web &amp; TLS</span><span class="tab-badge" id="tab-badge-tls">--</span></button>
-        <button class="segment-tab" type="button" role="tab" id="tab-subdomains" data-target="scope" aria-controls="panel-subdomains" aria-selected="false"><span>Subdomains &amp; Scope</span><span class="tab-badge" id="tab-badge-subdomains">0</span></button>
-        <span id="tab-badge-threats" aria-hidden="true" style="display:none"></span><span id="tab-badge-fixes" aria-hidden="true" style="display:none"></span>
+        <button class="segment-tab" type="button" role="tab" id="tab-subdomains" data-target="subdomains" aria-controls="panel-subdomains" aria-selected="false"><span>Subdomains</span><span class="tab-badge" id="tab-badge-subdomains">0</span></button>
+        <button class="segment-tab" type="button" role="tab" id="tab-network" data-target="network" aria-controls="panel-network" aria-selected="false">Network</button>
+        <button class="segment-tab" type="button" role="tab" id="tab-remediation" data-target="remediation" aria-controls="panel-remediation" aria-selected="false"><span>Fixes</span><span class="tab-badge" id="tab-badge-fixes">0</span></button>
       </nav>
 
       <!-- Panel 1: Overview — Security Posture Cockpit (Asymmetric Bento Grid) -->
@@ -388,7 +394,7 @@
       </div>
 
       <!-- Panel 3: Threat Defense -->
-      <div class="results-tab-panel" id="panel-threats" data-segment="dns" role="tabpanel" aria-labelledby="tab-records">
+      <div class="results-tab-panel" id="panel-threats" data-segment="security" role="tabpanel" aria-labelledby="tab-threats">
         <!-- Advanced Security Suite (DNSSEC, Subdomain Takeover, BIMI) -->
         <div id="security-suite-section" class="security-suite-section" style="display:none;">
           <h2 class="section-title"><svg class="heading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/></svg>Advanced Security &amp; Threat Defense</h2>
@@ -409,7 +415,7 @@
       </div>
 
       <!-- Panel 5: Passive Subdomain Inventory -->
-      <div class="results-tab-panel" id="panel-subdomains" data-segment="scope" role="tabpanel" aria-labelledby="tab-subdomains">
+      <div class="results-tab-panel" id="panel-subdomains" data-segment="subdomains" role="tabpanel" aria-labelledby="tab-subdomains">
         <div id="subdomains-section" class="subdomains-section" style="display:none;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
             <div>
@@ -435,7 +441,7 @@
       </div>
 
       <!-- Panel 6: Network Scope & Port Auditing -->
-      <div class="results-tab-panel" id="panel-network" data-segment="scope" role="tabpanel" aria-labelledby="tab-subdomains">
+      <div class="results-tab-panel" id="panel-network" data-segment="network" role="tabpanel" aria-labelledby="tab-network">
         <div class="network-scope-section">
           <div class="network-scope-header">
             <div>
@@ -575,13 +581,13 @@
       </div>
 
       <!-- Panel 4: Remediation -->
-      <div class="results-tab-panel" id="panel-remediation" data-segment="overview" role="tabpanel" aria-labelledby="tab-overview">
+      <div class="results-tab-panel" id="panel-remediation" data-segment="remediation" role="tabpanel" aria-labelledby="tab-remediation">
         <!-- Copy-paste remediation draft generator -->
         <div id="remediation-section" class="remediation-section" style="display:none;">
           <div class="remediation-header">
             <div>
               <h2 class="section-title" style="margin-bottom:4px;"><svg class="heading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 7a5 5 0 0 0-6.6 6.6L3 18l3 3 4.4-4.4A5 5 0 0 0 17 10l-3 3-3-3 3-3Z"/></svg>Copy-paste DNS Fix Drafts</h2>
-              <p class="remediation-sub">Copy-pasteable records tailored for Cloudflare, AWS Route 53, and GoDaddy to achieve an A+ security posture.</p>
+              <p class="remediation-sub">Draft records and provider guidance based on this scan. Review each suggestion against your DNS and mail setup before publishing.</p>
             </div>
             <button class="btn-download-zone" id="download-zone-btn" type="button">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -596,7 +602,7 @@
       </div>
 
       <!-- Panel 5: Findings -->
-      <div class="results-tab-panel" id="panel-findings" data-segment="overview" role="tabpanel" aria-labelledby="tab-overview">
+      <div class="results-tab-panel" id="panel-findings" data-segment="findings" role="tabpanel" aria-labelledby="tab-findings">
         <!-- Findings list -->
         <div class="findings-section" id="findings-section">
           <div class="findings-header">
@@ -694,7 +700,7 @@
         <button id="close-modal-btn" class="modal-close" type="button" aria-label="Close dialog">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="modal-sub">DNS Analyzer is engineered for mouse-free navigation and maximum ease of access:</p>
+        <p class="modal-sub">Keyboard navigation and accessibility features:</p>
         <div class="shortcuts-grid">
           <div class="shortcut-row"><kbd>/</kbd> <span>Focus domain search bar from anywhere</span></div>
           <div class="shortcut-row"><kbd>Enter</kbd> <span>Run concurrent DNS analysis</span></div>
@@ -710,7 +716,7 @@
           <div class="shortcut-row"><kbd>Esc</kbd> <span>Close dialog or dismiss error banners</span></div>
         </div>
         <div class="modal-a11y-note">
-          <strong>Accessibility Guarantee:</strong> Built with semantic HTML5, ARIA live regions for screen readers, high-contrast WCAG AA tokens, zero-npm vanilla JS, and URL auto-sanitization.
+          <strong>Accessibility features:</strong> Semantic HTML, screen-reader status regions, keyboard shortcuts, and high-contrast theme tokens.
         </div>
       </div>
     </div>
@@ -719,6 +725,6 @@
   <!-- Toast notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=2.2.0.6"></script>
 </body>
 </html>

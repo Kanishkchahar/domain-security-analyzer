@@ -2,17 +2,17 @@ import ast
 from pathlib import Path
 import logging
 
-from app.http_config import DEFAULT_DOCUMENTATION_URL, outbound_http_headers
+from app.http_config import DEFAULT_DOCUMENTATION_URL, PLACEHOLDER_DOCUMENTATION_URL, outbound_http_headers
 
 
 def test_outbound_user_agent_uses_configurable_documentation_link(monkeypatch):
     monkeypatch.delenv("DNS_ANALYZER_DOCUMENTATION_URL", raising=False)
     assert outbound_http_headers()["User-Agent"] == (
-        f"DNSAnalyzer/2.2.0 (+{DEFAULT_DOCUMENTATION_URL})"
+        f"DomainSecurityAnalyzer/2.2.0 (+{DEFAULT_DOCUMENTATION_URL})"
     )
     monkeypatch.setenv("DNS_ANALYZER_DOCUMENTATION_URL", "https://docs.example.test/scanner")
     assert outbound_http_headers()["User-Agent"] == (
-        "DNSAnalyzer/2.2.0 (+https://docs.example.test/scanner)"
+        "DomainSecurityAnalyzer/2.2.0 (+https://docs.example.test/scanner)"
     )
 
 
@@ -35,7 +35,7 @@ def test_every_application_async_http_client_sets_scanner_user_agent():
 def test_startup_warns_when_documentation_url_is_placeholder(monkeypatch, caplog):
     from app.main import app
 
-    monkeypatch.delenv("DNS_ANALYZER_DOCUMENTATION_URL", raising=False)
+    monkeypatch.setenv("DNS_ANALYZER_DOCUMENTATION_URL", PLACEHOLDER_DOCUMENTATION_URL)
     monkeypatch.setattr("app.http_config.logger", logging.getLogger("app.http_config"))
     with caplog.at_level(logging.WARNING, logger="app.http_config"):
         import asyncio
@@ -46,3 +46,19 @@ def test_startup_warns_when_documentation_url_is_placeholder(monkeypatch, caplog
 
         asyncio.run(start_and_shutdown())
     assert "default placeholder" in caplog.text
+
+
+def test_startup_does_not_warn_when_default_documentation_url_is_real(monkeypatch, caplog):
+    from app.main import app
+
+    monkeypatch.delenv("DNS_ANALYZER_DOCUMENTATION_URL", raising=False)
+    monkeypatch.setattr("app.http_config.logger", logging.getLogger("app.http_config"))
+    with caplog.at_level(logging.WARNING, logger="app.http_config"):
+        import asyncio
+
+        async def start_and_shutdown():
+            async with app.router.lifespan_context(app):
+                pass
+
+        asyncio.run(start_and_shutdown())
+    assert "default placeholder" not in caplog.text

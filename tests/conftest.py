@@ -1,4 +1,4 @@
-"""Shared fixtures and mock helpers for DNS Analyzer tests."""
+"""Shared fixtures and mock helpers for Domain Security Analyzer tests."""
 
 from typing import Any
 import pytest

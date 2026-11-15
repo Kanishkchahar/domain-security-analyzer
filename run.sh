@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# run.sh — All-in-one Setup, Test & Server Launcher for DNS Analyzer
+# run.sh — Setup, test, and server launcher for Domain Security Analyzer
 # Usage:
 #   bash run.sh              # Auto-setup (if needed) & start on port 8000
 #   bash run.sh 9000         # Auto-setup & start on custom port 9000
@@ -9,7 +9,7 @@
 #   bash run.sh --setup-only # Run setup/dependency install only
 #   bash run.sh --reload     # Enable development auto-reload
 #   DNS_ANALYZER_HOST=0.0.0.0 bash run.sh # Expose on the local network
-#   ./venv/bin/dns-analyzer example.com # Run a CLI scan after setup
+#   ./venv/bin/domain-security-analyzer example.com # Run a CLI scan after setup
 #   bash run.sh --help       # Display help reference
 # ============================================================
 
@@ -43,7 +43,7 @@ for arg in "$@"; do
     RUN_RELOAD=true
   elif [ "$arg" = "--help" ] || [ "$arg" = "-h" ]; then
     echo ""
-    echo -e "${GREEN}DNS Analyzer v2 — Security Posture Cockpit Edition${NC}"
+    echo -e "${GREEN}Domain Security Analyzer${NC}"
     echo "Usage:"
     echo "  bash run.sh              Start server on http://127.0.0.1:8000"
     echo "  bash run.sh <port>       Start server on custom port (e.g., 9000)"
@@ -53,7 +53,7 @@ for arg in "$@"; do
     echo "  Set scan-policy environment variables before launch to enable approved network scans"
     echo "  bash run.sh --reload     Enable development auto-reload"
     echo "  DNS_ANALYZER_HOST=0.0.0.0 bash run.sh  Expose on the local network"
-    echo "  ./venv/bin/dns-analyzer <domain> Run the shared scan pipeline from the CLI"
+    echo "  ./venv/bin/domain-security-analyzer <domain> Run the shared scan pipeline from the CLI"
     echo "  bash run.sh --help, -h   Show this help message"
     echo ""
     exit 0
@@ -64,26 +64,26 @@ done
 
 echo ""
 echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║   DNS Analyzer v2 — Security Posture Cockpit         ║${NC}"
+echo -e "${GREEN}║   Domain Security Analyzer                           ║${NC}"
 echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 if [ "$RUN_DOCKER" = true ]; then
-  echo -e "  ${CYAN}➜ Building and starting DNS Analyzer v2 container via Docker...${NC}"
-  docker build -t kanishkchahar/dns-analyzer:v2.2.0 -t kanishkchahar/dns-analyzer:v2 .
-  docker rm -f dns-analyzer-v2 2>/dev/null || true
-  docker run -d --name dns-analyzer-v2 --restart unless-stopped -p "${PORT:-8000}:8000" \
+  echo -e "  ${CYAN}➜ Building and starting Domain Security Analyzer via Docker...${NC}"
+  docker build -t kanishkchahar/domain-security-analyzer:2.2.0 -t kanishkchahar/domain-security-analyzer:latest .
+  docker rm -f domain-security-analyzer dns-analyzer-v2 2>/dev/null || true
+  docker run -d --name domain-security-analyzer --restart unless-stopped -p "${PORT:-8000}:8000" \
     -e ENABLE_ACTIVE_PORT_SCAN \
     -e PORT_SCAN_API_KEY \
     -e PORT_SCAN_ALLOWED_DOMAINS \
     -e ENABLE_WIDE_DIRECTORY_SCAN \
     -e WIDE_PATH_SCAN_API_KEY \
     -e WIDE_PATH_SCAN_ALLOWED_DOMAINS \
-    kanishkchahar/dns-analyzer:v2.2.0
+    kanishkchahar/domain-security-analyzer:2.2.0
   echo ""
   echo -e "  ${GREEN}✔ Container running on http://127.0.0.1:${PORT:-8000}/${NC}"
-  echo -e "  To view logs:  ${YELLOW}docker logs -f dns-analyzer-v2${NC}"
-  echo -e "  To stop:       ${YELLOW}docker stop dns-analyzer-v2${NC}"
+  echo -e "  To view logs:  ${YELLOW}docker logs -f domain-security-analyzer${NC}"
+  echo -e "  To stop:       ${YELLOW}docker stop domain-security-analyzer${NC}"
   echo ""
   exit 0
 fi
@@ -119,7 +119,7 @@ PYTHON="venv/bin/python"
 if ! "$PYTHON" -c 'import fastapi, uvicorn, dns.resolver, jinja2, pytest' &>/dev/null; then
   NEED_PIP_INSTALL=true
 fi
-if [ ! -x "venv/bin/dns-analyzer" ]; then
+if [ ! -x "venv/bin/domain-security-analyzer" ]; then
   NEED_PIP_INSTALL=true
 fi
 

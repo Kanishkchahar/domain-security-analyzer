@@ -410,7 +410,7 @@ class TestAPIEndpoints:
             resp = await client.get("/")
             assert resp.status_code == 200
             assert "text/html" in resp.headers["content-type"]
-            assert "DNS Analyzer" in resp.text
+            assert "Domain Security Analyzer" in resp.text
             assert resp.headers["x-content-type-options"] == "nosniff"
             assert resp.headers["x-frame-options"] == "DENY"
             assert "default-src 'self'" in resp.headers["content-security-policy"]

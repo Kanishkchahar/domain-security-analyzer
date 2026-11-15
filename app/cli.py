@@ -32,7 +32,7 @@ def _render_text(scan, *, min_grade: str | None = None) -> str:
     grade = score.grade if score else "N/A"
     numeric = score.score if score else 0
     lines = [
-        _color(f"DNS Analyzer · {scan.domain}", "1;36"),
+        _color(f"Domain Security Analyzer · {scan.domain}", "1;36"),
         f"Scan: {scan.scan_timestamp}",
         f"Grade: {_color(grade, '1;32' if grade.startswith('A') else '1;33' if grade in ('B', 'C') else '1;31')} ({numeric}/100)",
         ("Grade status: provisional; excluded factor weight exceeds 30%" if "(incomplete)" in grade else ""),
@@ -85,7 +85,7 @@ def _render_sarif(scan) -> dict:
         "version": "2.1.0",
         "runs": [{
             "tool": {"driver": {
-                "name": "DNS Analyzer",
+                "name": "Domain Security Analyzer",
                 "version": "2.2.0",
                 "rules": list(rules.values()),
             }},
@@ -102,7 +102,7 @@ async def _scan(domain: str):
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="dns-analyzer", description="Audit a domain using the DNS Analyzer scan pipeline.")
+    parser = argparse.ArgumentParser(description="Assess a domain using the Domain Security Analyzer scan pipeline.")
     parser.add_argument("domain", help="Domain to analyze, or a full URL whose hostname will be extracted")
     output_format = parser.add_mutually_exclusive_group()
     output_format.add_argument("--json", action="store_true", help="Print the complete scan result as JSON")

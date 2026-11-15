@@ -87,7 +87,7 @@ class TestReportBuilder:
         )
 
         assert "<!DOCTYPE html>" in html
-        assert "<title>DNS Report — example.com</title>" in html
+        assert "<title>Domain Security Report — example.com</title>" in html
         assert "example.com" in html
         assert "Domain resolves cleanly." in html
         assert "SPF uses ?all." in html

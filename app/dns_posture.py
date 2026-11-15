@@ -233,7 +233,7 @@ async def check_wildcard_dns(
     resolver: dns.asyncresolver.Resolver,
 ) -> tuple[dict[str, Any], list[Finding]]:
     """Probe a high-entropy label for wildcard A/AAAA behavior."""
-    label = f"dns-analyzer-{secrets.token_hex(16)}"
+    label = f"domain-security-analyzer-{secrets.token_hex(16)}"
     probe = f"{label}.{zone.rstrip('.')}"
     answers: dict[str, list[str]] = {"A": [], "AAAA": []}
     lookup_errors: list[str] = []

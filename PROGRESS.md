@@ -1,6 +1,6 @@
-# Project status
+# Domain Security Analyzer status
 
-This snapshot reflects the current 2.2.0 codebase and its reviewed behavior. Run `./venv/bin/pytest -q` for the current test count; counts are intentionally not treated as a release promise.
+This snapshot reflects the current codebase and its reviewed behavior. Run `./venv/bin/pytest -q` for the current test count; counts are intentionally not treated as a release promise.
 
 ## Implemented
 

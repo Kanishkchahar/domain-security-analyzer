@@ -1,12 +1,26 @@
-# DNS Analyzer 2.2.0
+# Domain Security Analyzer
 
-[![CI](https://github.com/Kanishkchahar/dns-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/Kanishkchahar/dns-analyzer/actions/workflows/ci.yml)
+[![CI](https://github.com/Kanishkchahar/domain-security-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/Kanishkchahar/domain-security-analyzer/actions/workflows/ci.yml)
 
-DNS Analyzer checks a domain’s public DNS, email authentication, DNSSEC delegation, TLS, selected web settings, and known CNAME takeover indicators. It provides a browser dashboard, Python CLI, JSON API, and offline HTML report.
+Domain Security Analyzer assesses public DNS, email authentication, DNSSEC delegation, TLS and selected web settings, subdomain inventory, and known CNAME takeover indicators. It provides a browser dashboard, Python CLI, JSON API, bounded network diagnostics, and offline HTML reports.
 
 Results are point-in-time observations. They are not a penetration test or a guarantee that a domain is secure. See the [scan guide](docs/scan.md) for check details and limits.
 
-![DNS Analyzer dashboard](docs/images/dashboard.png)
+![Domain Security Analyzer dashboard](docs/images/dashboard.png)
+
+## Screenshots
+
+Scroll the gallery horizontally to browse the scan views. Select a preview to open its full-size screenshot.
+
+<table>
+  <tr>
+    <td><a href="docs/images/screenshots/scan-01.jpg"><img src="docs/images/screenshots/scan-01-preview.jpg" alt="Domain Security Analyzer scan view 1" width="280"></a><br><strong>Scan view 1</strong></td>
+    <td><a href="docs/images/screenshots/scan-02.jpg"><img src="docs/images/screenshots/scan-02-preview.jpg" alt="Domain Security Analyzer scan view 2" width="280"></a><br><strong>Scan view 2</strong></td>
+    <td><a href="docs/images/screenshots/scan-03.jpg"><img src="docs/images/screenshots/scan-03-preview.jpg" alt="Domain Security Analyzer scan view 3" width="280"></a><br><strong>Scan view 3</strong></td>
+    <td><a href="docs/images/screenshots/scan-04.jpg"><img src="docs/images/screenshots/scan-04-preview.jpg" alt="Domain Security Analyzer scan view 4" width="280"></a><br><strong>Scan view 4</strong></td>
+    <td><a href="docs/images/screenshots/scan-05.jpg"><img src="docs/images/screenshots/scan-05-preview.jpg" alt="Domain Security Analyzer scan view 5" width="280"></a><br><strong>Scan view 5</strong></td>
+  </tr>
+</table>
 
 ## Run locally
 
@@ -21,8 +35,8 @@ Open <http://127.0.0.1:8000>. The runner prepares `venv/` and starts the server 
 To run with Docker:
 
 ```bash
-docker build -t dns-analyzer .
-docker run --rm -p 8000:8000 dns-analyzer
+docker build -t domain-security-analyzer .
+docker run --rm -p 8000:8000 domain-security-analyzer
 ```
 
 The local runner binds to `127.0.0.1`. The Docker image listens on `0.0.0.0` inside the container; Docker's published port controls host exposure. For network or public deployment, review [deployment and privacy notes](docs/DEPLOYMENT.md) and put an authenticated, rate-limited proxy in front of the app.
@@ -40,16 +54,18 @@ The local runner binds to `127.0.0.1`. The Docker image listens on `0.0.0.0` ins
 
 The overall grade is a rule-based summary, not a probability of compromise. It shows incomplete checks, excluded factors, and applied score caps. Missing IPv4 or IPv6 alone does not lower the address-resolution score when the other family resolves. See [score and status interpretation](docs/scan.md#scores-findings-and-remediation).
 
-Version 2.2.0 changed score normalization and incomplete-grade reporting. Grades and `--min-grade` results may differ from earlier versions.
+See the [changelog](CHANGELOG.md) for release-specific changes to scoring and incomplete-grade reporting.
 
 ## CLI
 
+The package and primary command are named `domain-security-analyzer`. The previous `dns-analyzer` command remains as a compatibility alias.
+
 ```bash
 bash run.sh --setup-only
-./venv/bin/dns-analyzer example.com
-./venv/bin/dns-analyzer example.com --json
-./venv/bin/dns-analyzer example.com --sarif > findings.sarif
-./venv/bin/dns-analyzer example.com --min-grade B --require-complete
+./venv/bin/domain-security-analyzer example.com
+./venv/bin/domain-security-analyzer example.com --json
+./venv/bin/domain-security-analyzer example.com --sarif > findings.sarif
+./venv/bin/domain-security-analyzer example.com --min-grade B --require-complete
 ```
 
 `--json` and `--sarif` are mutually exclusive. `--min-grade` compares the base grade; `--require-complete` rejects provisional grades. Exit codes are 0 for success, 1 for invalid input or tool failure, 2 for a grade below threshold, 3 for error findings, and 4 for an incomplete grade when completeness is required. Error findings take precedence over grade results.
@@ -99,7 +115,7 @@ uv.lock               Resolved dependency lock
 
 ## Related tools
 
-These tools cover adjacent use cases; DNS Analyzer is not a replacement for specialist diagnostics.
+These tools cover adjacent use cases; Domain Security Analyzer is not a replacement for specialist diagnostics.
 
 | Tool | Best suited to |
 |---|---|

@@ -26,7 +26,7 @@ def _download(url: str, cap: int = 1024 * 1024) -> bytes:
 
 def verify_detached_signature(xml: bytes, signature: bytes, certificate_bundle: bytes) -> None:
     """Verify the detached CMS/S-MIME signature using IANA's published CA bundle."""
-    with tempfile.TemporaryDirectory(prefix="dns-analyzer-anchor-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="domain-security-analyzer-anchor-") as temporary:
         root = Path(temporary)
         xml_path, signature_path, ca_path = root / "root-anchors.xml", root / "root-anchors.p7s", root / "icannbundle.pem"
         xml_path.write_bytes(xml)

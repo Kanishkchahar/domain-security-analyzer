@@ -1,5 +1,5 @@
 # ==============================================================================
-# Dockerfile v2 — Production Multi-Stage Build for DNS Analyzer 2.2.0
+# Multi-stage production build for Domain Security Analyzer
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -37,16 +37,16 @@ COPY . ./
 
 RUN /opt/venv/bin/pip install --no-cache-dir -r requirements-dev.txt \
     && /opt/venv/bin/pytest -q \
-    && touch /tmp/dns-analyzer-tests-passed
+    && touch /tmp/domain-security-analyzer-tests-passed
 
 # ------------------------------------------------------------------------------
-# Stage 3: Production Runtime (v2)
+# Stage 3: Production Runtime
 # ------------------------------------------------------------------------------
 FROM python:${PYTHON_VERSION}-slim AS runtime
 
-LABEL maintainer="DNS Analyzer Team" \
+LABEL maintainer="Domain Security Analyzer contributors" \
       version="2.2.0" \
-      description="DNS Analyzer 2.2.0 — Security Posture Cockpit & DNS/Email Diagnostic Engine"
+      description="Domain and infrastructure security assessment dashboard and scanner"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -57,7 +57,7 @@ WORKDIR /app
 
 # Copy isolated virtual environment from builder
 COPY --from=builder /opt/venv /opt/venv
-COPY --from=test /tmp/dns-analyzer-tests-passed /tmp/dns-analyzer-tests-passed
+COPY --from=test /tmp/domain-security-analyzer-tests-passed /tmp/domain-security-analyzer-tests-passed
 
 # Copy only production application code and static assets
 COPY app ./app

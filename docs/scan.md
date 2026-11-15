@@ -1,6 +1,6 @@
-# DNS Analyzer scan guide
+# Domain Security Analyzer scan guide
 
-This guide describes the checks DNS Analyzer runs, what their results can tell you, and what they do not establish. A scan is a point-in-time observation of public DNS and network services. It is not a penetration test, a certification, or proof that a domain is secure.
+This guide describes the checks Domain Security Analyzer runs, what their results can tell you, and what they do not establish. A scan is a point-in-time observation of public DNS and network services. It is not a penetration test, a certification, or proof that a domain is secure.
 
 ## Ways to run checks
 
@@ -41,7 +41,7 @@ SPF analysis reads SPF TXT records for the scanned hostname. It checks for missi
 
 A failed TXT lookup is reported as inconclusive. It is not treated as proof that SPF is missing, and the email grade is marked incomplete.
 
-SPF tells receiving mail systems which senders the domain authorizes. A missing SPF record can be expected for a subdomain that does not send mail. A syntactically valid policy can still omit a legitimate sender. DNS Analyzer therefore gives a sender-confirmation checklist instead of inventing a provider-specific SPF record when it cannot establish the sending infrastructure.
+SPF tells receiving mail systems which senders the domain authorizes. A missing SPF record can be expected for a subdomain that does not send mail. A syntactically valid policy can still omit a legitimate sender. Domain Security Analyzer therefore gives a sender-confirmation checklist instead of inventing a provider-specific SPF record when it cannot establish the sending infrastructure.
 
 ### DMARC
 
@@ -67,7 +67,7 @@ BIMI checks the default selector record at `default._bimi.<domain>` and whether 
 
 The mail transport check queries `_mta-sts.<domain>` and `_smtp._tls.<domain>` TXT records. When MTA-STS is configured, it makes a bounded HTTPS request for the policy file on `mta-sts.<domain>` and reports whether the file's basic required fields and mode are valid. TLS-RPT results show discovered reporting URIs.
 
-These checks inspect published policy and reporting configuration. DNS Analyzer does not send email, test a real sender-to-recipient delivery, or prove that remote mail systems obey the policy.
+These checks inspect published policy and reporting configuration. Domain Security Analyzer does not send email, test a real sender-to-recipient delivery, or prove that remote mail systems obey the policy.
 
 ### Certificate Transparency subdomains and takeover indicators
 

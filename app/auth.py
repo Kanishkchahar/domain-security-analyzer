@@ -63,5 +63,5 @@ def validate_public_target_name(domain: str) -> str:
         raise ValueError("Private or special-use domain suffixes cannot be scanned.")
     blocked = blocked_target_names()
     if normalized in blocked or any(normalized.endswith("." + name) for name in blocked if "." in name):
-        raise ValueError("The DNS Analyzer server's own hostname or address cannot be scanned.")
+        raise ValueError("The Domain Security Analyzer server's own hostname or address cannot be scanned.")
     return domain

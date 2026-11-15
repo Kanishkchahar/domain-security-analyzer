@@ -1,4 +1,4 @@
-"""Performance benchmarks for the DNS Analyzer.
+"""Performance benchmarks for Domain Security Analyzer.
 
 Run with: python -m scripts.bench example.com
           python -m scripts.bench --iterations 5 example.com
@@ -54,7 +54,7 @@ async def main():
         if idx + 1 < len(sys.argv):
             iterations = int(sys.argv[idx + 1])
 
-    print(f"=== DNS Analyzer Benchmark ===")
+    print("=== Domain Security Analyzer Benchmark ===")
     print(f"Domain: {domain}")
     print(f"Iterations: {iterations}")
     print()

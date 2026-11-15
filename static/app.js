@@ -1,5 +1,5 @@
 /* ============================================================
-   DNS Analyzer — Frontend Logic
+   Domain Security Analyzer — Frontend Logic
    ============================================================ */
 
 "use strict";
@@ -1171,7 +1171,6 @@ if (clearScanHistoryButton) {
 
 // ── Tab Badges & Overview Snapshots ───────────────────────────
 function updateTabBadges(data) {
-  const wide = data.scan_capabilities?.wide_directory_scan || {};
   // 1. Email badge & snapshot
   const emailBadge = document.getElementById("tab-badge-email");
   const emailPill = document.getElementById("overview-email-pill");
@@ -1223,29 +1222,45 @@ function updateTabBadges(data) {
   const fixesBadge = document.getElementById("tab-badge-fixes");
   const fixPill = document.getElementById("overview-fix-pill");
   const fixDesc = document.getElementById("overview-fix-desc");
-  const fixCount = (data.remediation || []).length;
+  const remediationItems = data.remediation || [];
+  const fixCount = remediationItems.length;
+  const draftCount = remediationItems.filter((item) => !item.guidance_only && Boolean(item.value)).length;
+  const guidanceCount = fixCount - draftCount;
+  const errors = Number(data.summary?.errors || 0);
+  const warnings = Number(data.summary?.warnings || 0);
+  const inconclusive = Number(data.summary?.inconclusive || 0);
+  const needsReview = errors + warnings + inconclusive > 0;
 
   if (fixesBadge) {
-    fixesBadge.textContent = `${fixCount} Fix${fixCount === 1 ? "" : "es"}`;
+    fixesBadge.textContent = fixCount > 0 ? String(fixCount) : (needsReview ? "!" : "0");
+    fixesBadge.title = fixCount > 0
+      ? `${fixCount} remediation suggestion${fixCount === 1 ? "" : "s"}`
+      : (needsReview ? "Review findings; no remediation suggestions were generated." : "No remediation suggestions.");
+    fixesBadge.className = "tab-badge " + (fixCount > 0 || needsReview ? "badge-amber" : "badge-green");
   }
   if (fixPill) {
-    fixPill.textContent = fixCount === 0 ? "Posture Optimal" : `${fixCount} Fix${fixCount === 1 ? "" : "es"} Ready`;
-    fixPill.className = "snapshot-pill " + (fixCount === 0 ? "good" : "warn");
+    fixPill.textContent = fixCount > 0 ? `${fixCount} Suggestion${fixCount === 1 ? "" : "s"}` : (needsReview ? "Review Scan" : "No Findings");
+    fixPill.className = "snapshot-pill " + (fixCount > 0 || needsReview ? "warn" : "good");
   }
   if (fixDesc) {
     fixDesc.textContent = fixCount === 0
-      ? "Zero configuration changes needed. Your DNS zone is fully hardened!"
-      : `${fixCount} actionable DNS change${fixCount === 1 ? "" : "s"} generated for Cloudflare, Route 53, and GoDaddy.`;
+      ? (needsReview
+        ? "No copy-paste DNS changes were generated. Review findings and checks that could not be verified."
+        : "No errors, warnings, or inconclusive checks were reported in the completed scan.")
+      : `${draftCount} copy-paste record draft${draftCount === 1 ? "" : "s"} and ${guidanceCount} guidance-only item${guidanceCount === 1 ? "" : "s"}. Review before publishing.`;
   }
 
   // 4. Findings badge
   const findingsBadge = document.getElementById("tab-badge-findings");
   const errCount = data.summary?.errors || 0;
+  const warningCount = data.summary?.warnings || 0;
   if (findingsBadge) {
     findingsBadge.textContent = String((data.findings || []).length);
-    findingsBadge.className = "tab-badge " + (errCount > 0 ? "badge-red" : "badge-green");
+    findingsBadge.className = "tab-badge " + (errCount > 0 ? "badge-red" : warningCount > 0 ? "badge-amber" : "badge-green");
   }
-  if (btnRunFfufScan) btnRunFfufScan.disabled = !wide.enabled;
+  if (btnRunFfufScan) {
+    btnRunFfufScan.disabled = !Boolean(data.scan_capabilities?.wide_directory_scan?.enabled);
+  }
 }
 
 // ── Bento Grid Security Posture Cockpit ───────────────────────
@@ -1550,22 +1565,39 @@ function renderBentoCockpit(data, previousScore = null) {
   const fixesDot = document.getElementById("bento-fixes-dot");
 
   if (fixesHeadline && fixesBullets) {
-    const fixCount = (data.remediation || []).length;
+    const remediationItems = data.remediation || [];
+    const fixCount = remediationItems.length;
+    const draftCount = remediationItems.filter((item) => !item.guidance_only && Boolean(item.value)).length;
+    const guidanceCount = fixCount - draftCount;
+    const errors = Number(data.summary?.errors || 0);
+    const warnings = Number(data.summary?.warnings || 0);
+    const inconclusive = Number(data.summary?.inconclusive || 0);
     if (fixCount === 0) {
-      fixesHeadline.textContent = "Fully Hardened";
-      fixesBullets.innerHTML = `
-        <li><span class="bullet-label">Critical Fixes:</span> <span class="bullet-val ok">0 Needed</span></li>
-        <li><span class="bullet-label">Posture:</span> <span class="bullet-val ok">Optimal A+ Configuration</span></li>
-      `;
-      if (fixesStatusEl) fixesStatusEl.textContent = "Status: Optimal";
-      if (fixesDot) fixesDot.className = "bento-status-dot ok";
+      const issueCount = errors + warnings;
+      if (issueCount > 0 || inconclusive > 0) {
+        fixesHeadline.textContent = issueCount > 0 ? "Review Scan Findings" : "Checks Need Review";
+        fixesBullets.innerHTML = `
+          <li><span class="bullet-label">Errors / warnings:</span> <span class="bullet-val warn">${issueCount}</span></li>
+          <li><span class="bullet-label">Inconclusive checks:</span> <span class="bullet-val warn">${inconclusive}</span></li>
+        `;
+        if (fixesStatusEl) fixesStatusEl.textContent = "Status: Review";
+        if (fixesDot) fixesDot.className = "bento-status-dot warn";
+      } else {
+        fixesHeadline.textContent = "No Findings Reported";
+        fixesBullets.innerHTML = `
+          <li><span class="bullet-label">Errors / warnings:</span> <span class="bullet-val ok">0</span></li>
+          <li><span class="bullet-label">Inconclusive checks:</span> <span class="bullet-val ok">0</span></li>
+        `;
+        if (fixesStatusEl) fixesStatusEl.textContent = "Status: No findings";
+        if (fixesDot) fixesDot.className = "bento-status-dot ok";
+      }
     } else {
-      fixesHeadline.textContent = "Actionable Fixes Available";
+      fixesHeadline.textContent = "Suggested Changes to Review";
       fixesBullets.innerHTML = `
-        <li><span class="bullet-label">Fixes Ready:</span> <span class="bullet-val warn">${fixCount} Copy-Paste Record${fixCount === 1 ? "" : "s"}</span></li>
-        <li><span class="bullet-label">Posture:</span> <span class="bullet-val warn">Hardening Required</span></li>
+        <li><span class="bullet-label">Record drafts:</span> <span class="bullet-val warn">${draftCount}</span></li>
+        <li><span class="bullet-label">Guidance only:</span> <span class="bullet-val warn">${guidanceCount}</span></li>
       `;
-      if (fixesStatusEl) fixesStatusEl.textContent = `Status: ${fixCount} Action${fixCount === 1 ? "" : "s"}`;
+      if (fixesStatusEl) fixesStatusEl.textContent = `Status: ${fixCount} suggestion${fixCount === 1 ? "" : "s"}`;
       if (fixesDot) fixesDot.className = "bento-status-dot warn";
     }
   }
@@ -2506,9 +2538,10 @@ function renderTLS(tls) {
 
   if (!tls || !tls.scanned) {
     const status = tls?.status || "unavailable";
-    const badgeText = status === "blocked" ? "Blocked" : status === "unreachable" ? "No Response" : "N/A";
+    const badgeText = status === "blocked" ? "Off" : status === "unreachable" ? "Down" : "N/A";
     if (tlsBadge) {
       tlsBadge.textContent = badgeText;
+      tlsBadge.title = `TLS check: ${status}`;
       tlsBadge.className = "tab-badge" + (status === "blocked" ? " badge-amber" : "");
     }
     tlsCards.innerHTML = `
@@ -2523,18 +2556,21 @@ function renderTLS(tls) {
   const cert = tls.certificate;
   let statusClass = tls.status === "certificate_error" ? "badge-red" : "badge-green";
   let statusText = tls.status === "certificate_error"
-    ? "Cert Error"
-    : (tls.tls_version ? `${tls.tls_version} Active` : "TLS Checked");
+    ? "Error"
+    : (tls.tls_version ? "TLS OK" : "Checked");
   if (tls.status !== "certificate_error" && cert?.is_expired) {
     statusClass = "badge-red";
     statusText = "Expired";
   } else if (cert && !cert.is_expired && cert.days_remaining <= 30) {
     statusClass = "badge-amber";
-    statusText = "Expiring Soon";
+    statusText = "Soon";
   }
 
   if (tlsBadge) {
     tlsBadge.textContent = statusText;
+    tlsBadge.title = tls.status === "certificate_error"
+      ? "Certificate error"
+      : cert?.is_expired ? "Certificate expired" : cert?.days_remaining <= 30 ? "Certificate expiring soon" : "TLS and certificate checks completed";
     tlsBadge.className = "tab-badge " + statusClass;
   }
 
@@ -2597,14 +2633,14 @@ function renderTLS(tls) {
 
   if (Array.isArray(tls.protocol_sweep)) {
     const sweepCard = document.createElement("article");
-    sweepCard.className = "security-card";
+    sweepCard.className = "security-card tls-protocol-sweep-card";
     const sweepTitle = document.createElement("h3");
     sweepTitle.className = "sec-card-title";
     sweepTitle.textContent = "TLS Protocol Support Sweep";
     sweepCard.appendChild(sweepTitle);
     for (const item of tls.protocol_sweep) {
       const row = document.createElement("div");
-      row.className = "auth-card-row";
+      row.className = "auth-card-row tls-protocol-row";
       const version = document.createElement("span");
       version.className = "auth-card-key";
       version.textContent = item.protocol;
@@ -2688,6 +2724,10 @@ function renderSubdomains(subData) {
 
   currentSubdomainData = subData;
   const inventoryStatus = subData?.status || "unavailable";
+  const inventoryState = String(subData?.state || "").toUpperCase();
+  const inventoryUnavailable = ["SOURCE_UNAVAILABLE", "TIMEOUT"].includes(inventoryState)
+    || ["unavailable", "inconclusive"].includes(String(inventoryStatus).toLowerCase());
+  const inventoryPartial = inventoryState === "PARTIAL_RESULTS" || String(inventoryStatus).toLowerCase() === "partial";
   if (subdomainsMeta) {
     const state = String(subData?.state || inventoryStatus).replaceAll("_", " ").toLowerCase();
     const source = subData?.source || "Certificate Transparency provider";
@@ -2718,18 +2758,18 @@ function renderSubdomains(subData) {
     };
   }
   if (subBadge) {
-    subBadge.textContent = inventoryStatus === "unavailable"
+    subBadge.textContent = inventoryUnavailable
       ? "N/A"
-      : `${subs.length}${inventoryStatus === "partial" ? "+" : ""}`;
-    subBadge.className = "tab-badge " + (inventoryStatus === "unavailable" ? "badge-amber" : (subs.length > 0 ? "badge-green" : ""));
+      : `${subs.length}${inventoryPartial ? "+" : ""}`;
+    subBadge.className = "tab-badge " + (inventoryUnavailable || inventoryPartial ? "badge-amber" : (subs.length > 0 ? "badge-green" : ""));
   }
   if (subCountPill) {
-    subCountPill.textContent = inventoryStatus === "unavailable"
+    subCountPill.textContent = inventoryUnavailable
       ? "Inventory Unavailable"
-      : `${subs.length}${inventoryStatus === "partial" ? "+" : ""} Discovered Host${subs.length === 1 ? "" : "s"}`;
+      : `${subs.length}${inventoryPartial ? "+" : ""} ${inventoryPartial ? "Listed" : "Discovered"} Host${subs.length === 1 ? "" : "s"}`;
   }
 
-  if (inventoryStatus === "unavailable") {
+  if (inventoryUnavailable && subs.length === 0) {
     subList.innerHTML = `
       <div class="tls-unavailable" role="status">
         Certificate Transparency inventory could not be retrieved. ${escapeHtml(subData?.reason || "No scan details were returned.")}
@@ -2757,7 +2797,10 @@ function renderSubdomains(subData) {
 
   function renderRows(items) {
     if (items.length === 0) {
-      return `<tr><td colspan="8" style="text-align:center; padding:18px; color:var(--text-muted);">No matching subdomains found.</td></tr>`;
+      const emptyMessage = inventoryPartial
+        ? "The partial inventory did not list any subdomains; more results may exist."
+        : "Certificate Transparency sources listed no subdomains. This does not prove that none exist.";
+      return `<tr><td colspan="8" style="text-align:center; padding:18px; color:var(--text-muted);">${emptyMessage}</td></tr>`;
     }
     return items.map(s => {
       const isDangling = s.status === "dangling" || s.takeover?.vulnerable;
@@ -2964,13 +3007,18 @@ function renderRemediation(fixes, snippet) {
   currentZoneSnippet = snippet || "";
 
   if (!fixes || fixes.length === 0) {
+    const summary = currentScanData?.summary || {};
+    const needsReview = Number(summary.errors || 0) + Number(summary.warnings || 0) + Number(summary.inconclusive || 0) > 0;
     remediationList.innerHTML = `
-      <div class="no-issues" role="status">
+      <div class="no-issues ${needsReview ? "needs-review" : ""}" role="status">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="8" cy="8" r="7" stroke="#63B995" stroke-width="1.5"/>
-          <path d="M5 8l2 2 4-4" stroke="#63B995" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          ${needsReview
+            ? '<circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4m0-6h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
+            : '<circle cx="8" cy="8" r="7" stroke="#63B995" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#63B995" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'}
         </svg>
-        Optimal posture! All DNS, SPF, DMARC, and security records are properly configured.
+        ${needsReview
+          ? "No copy-paste DNS record drafts were generated. Review the findings and inconclusive checks; this result does not certify the domain as fully hardened."
+          : "No errors, warnings, or inconclusive checks were reported in the completed scan. This is not a guarantee that every possible risk was tested."}
       </div>
     `;
     remediationSection.style.display = "block";
@@ -3132,17 +3180,23 @@ let activeSegmentTabId = "tab-overview";
 
 // Older links and card links used tab ids; the URL hash uses the panel segment.
 const SEGMENT_HASH_ALIASES = {
-  "tab-findings": "overview",
-  "tab-remediation": "overview",
-  "tab-threats": "dns",
-  "tab-network": "scope",
-  findings: "overview",
-  remediation: "overview",
-  threats: "dns",
-  network: "scope",
+  "tab-overview": "overview",
+  "tab-records": "dns",
+  "tab-email": "email",
+  "tab-tls": "web",
+  "tab-subdomains": "subdomains",
+  "tab-findings": "findings",
+  "tab-remediation": "remediation",
+  "tab-threats": "security",
+  "tab-network": "network",
+  findings: "findings",
+  remediation: "remediation",
+  threats: "security",
+  network: "network",
+  scope: "subdomains",
   records: "dns",
   tls: "web",
-  subdomains: "scope",
+  subdomains: "subdomains",
 };
 
 function segmentTabFromHash() {
@@ -3180,11 +3234,6 @@ function switchSegmentTab(targetTabId, shouldFocus = false) {
   const resultsEl = document.getElementById("results");
   if (!tabs.length || !panels.length) return;
 
-  const aliases = {
-    "tab-findings": "tab-overview", "tab-remediation": "tab-overview",
-    "tab-threats": "tab-records", "tab-network": "tab-subdomains",
-  };
-  targetTabId = aliases[targetTabId] || targetTabId;
   const targetTab = document.getElementById(targetTabId);
   if (!targetTab) return;
 
@@ -3220,6 +3269,7 @@ function switchSegmentTab(targetTabId, shouldFocus = false) {
     if (navRect.top < 50) {
       nav.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    targetTab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
   }
 }
 
@@ -3409,7 +3459,7 @@ function generateMarkdownSummary(data) {
   }
 
   md.push("");
-  md.push(`*Analyzed by [DNS Analyzer](http://127.0.0.1:8000/?domain=${encodeURIComponent(d)})*`);
+  md.push(`*Analyzed by [Domain Security Analyzer](http://127.0.0.1:8000/?domain=${encodeURIComponent(d)})*`);
   return md.join("\n");
 }
 
@@ -3707,7 +3757,8 @@ if (btnRunPathScan && listScanInput && networkPathResults) {
           return acc;
         }, {});
         const pillClass = target.status === "complete" ? "pill-ok" : (target.status === "blocked" ? "pill-fail" : "pill-warn");
-        const rows = (target.paths || []).map(item => {
+        const pathItems = target.paths || [];
+        const rows = pathItems.map(item => {
           const label = {
             found: "Available", redirect: "Redirect", restricted: "Restricted", not_found: "Not Found",
             unavailable: "No Response", response: "HTTP Response",
@@ -3732,6 +3783,17 @@ if (btnRunPathScan && listScanInput && networkPathResults) {
           }
         }
 
+        const pathTable = rows
+          ? `<div class="records-table-container path-table-container"><table class="records-table path-results-table">
+              <thead><tr><th>Path</th><th>Result</th><th>HTTP</th><th>Details</th></tr></thead><tbody>${rows}</tbody>
+            </table></div>`
+          : `<p class="path-scan-reason">No path requests were sent because this target did not pass the public-scope check.</p>`;
+        const collapsePathResults = pathItems.length > 12
+          && !(counts.found || counts.restricted || counts.unavailable);
+        const displayedPathTable = pathItems.length > 12
+          ? `<details class="path-results-details" ${collapsePathResults ? "" : "open"}><summary>Show all ${pathItems.length} path results</summary>${pathTable}</details>`
+          : pathTable;
+
         return `<section class="audit-card path-scan-card" aria-label="Common web paths for ${escapeHtml(target.target)}">
           <div class="audit-card-header">
             <div>
@@ -3745,9 +3807,7 @@ if (btnRunPathScan && listScanInput && networkPathResults) {
             <h3>Paths advertised by robots.txt or sitemap <span>${target.advertised_paths.length}</span></h3>
             <div class="path-advertised-list">${target.advertised_paths.map(item => `<div><code>${escapeHtml(item.path)}</code><span>${escapeHtml(item.source)}${item.review === "review" ? ` · <strong title="${escapeHtml(item.review_reason || "Name merits manual review; no access was attempted.")}">Review</strong>` : ""}</span></div>`).join("")}</div>
           </div>` : ""}
-          ${rows ? `<div class="records-table-container path-table-container"><table class="records-table path-results-table">
-            <thead><tr><th>Path</th><th>Result</th><th>HTTP</th><th>Details</th></tr></thead><tbody>${rows}</tbody>
-          </table></div>` : `<p class="path-scan-reason">No path requests were sent because this target did not pass the public-scope check.</p>`}
+          ${displayedPathTable}
         </section>`;
       }).join("");
     } catch (err) {

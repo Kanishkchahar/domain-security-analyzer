@@ -1,4 +1,4 @@
-"""Pydantic request/response schemas for the DNS Analyzer API."""
+"""Pydantic request/response schemas for the Domain Security Analyzer API."""
 
 import re
 import logging
