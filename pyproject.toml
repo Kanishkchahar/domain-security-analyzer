@@ -38,6 +38,9 @@ packages = ["app", "app.data", "app.checks"]
 [tool.setuptools.data-files]
 static = ["static/index.html", "static/app.js", "static/style.css"]
 
+[tool.vercel]
+entrypoint = "app.main:app"
+
 [tool.ruff]
 cache-dir = "/tmp/.ruff_cache"
 

@@ -699,7 +699,7 @@ async def health_full() -> dict[str, Any]:
     # Check API keys
     api_keys = [key.strip() for key in os.environ.get("DNS_ANALYZER_API_KEYS", "").split(",") if key.strip()]
     if not api_keys:
-        warnings.append("API key authentication is disabled; use an authenticated proxy before public deployment.")
+        warnings.append("API key authentication is disabled; scan API routes accept anonymous requests.")
 
     # Check rate limit configs
     rate_limit = os.environ.get("DNS_ANALYZER_RATE_LIMIT_PER_MIN")

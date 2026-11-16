@@ -3,7 +3,7 @@
 ## Safe defaults
 
 - `bash run.sh` binds to `127.0.0.1:8000`. Use `DNS_ANALYZER_HOST` to change the bind address. The Docker image listens on `0.0.0.0` inside its network namespace; use the published port mapping to control host exposure.
-- Public deployments should sit behind an authenticated, rate-limited reverse proxy. Without `DNS_ANALYZER_API_KEYS`, general scan endpoints are unauthenticated; configuring keys protects the scan, report, and network API routes documented below.
+- Public deployments should either require `DNS_ANALYZER_API_KEYS` or deliberately allow anonymous scans with rate limits and optional scan features disabled. Without the key, scan, report, and network API routes are publicly callable.
 - Active TCP port scanning is disabled by default. Enable it only when you have an authorization policy and approved target scope.
 - The DNS, CT, and HTTP checks make outbound requests. Parent-child delegation checks send bounded UDP/TCP DNS queries to public parent authoritative nameserver addresses discovered through DNS. Use the tool only for domains and hosts you are authorized to assess.
 
@@ -62,7 +62,11 @@ The dashboard reads `GET /api/network/capabilities` on load, so the Network Scop
 
 ### Public deployment threat model
 
-Domain Security Analyzer makes DNS and bounded HTTP or TCP requests on behalf of its caller. A public instance can therefore be abused as a scanning proxy. Keep it behind a trusted reverse proxy, enable `DNS_ANALYZER_API_KEYS`, set conservative rate and target cooldown limits, and configure `DNS_ANALYZER_BLOCKED_TARGETS` with any public aliases or addresses that route back to the deployment. Special-use suffixes such as `.local`, `.internal`, `.onion`, and `.localhost` are rejected. Optional active network checks still require their own explicit authorization controls.
+Domain Security Analyzer makes DNS and bounded HTTP or TCP requests on behalf of its caller. A public instance can therefore be abused as a scanning proxy. For an anonymous public demo, leave `ENABLE_ACTIVE_PORT_SCAN=false` and `ENABLE_WIDE_DIRECTORY_SCAN=false`, set conservative rate and target cooldown limits, and configure `DNS_ANALYZER_BLOCKED_TARGETS` with any public aliases or addresses that route back to the deployment. Special-use suffixes such as `.local`, `.internal`, `.onion`, and `.localhost` are rejected, and targets are checked against public address ranges. Optional active network checks still require their own explicit authorization controls.
+
+The application's limiter and cooldown table are in process memory. On a serverless platform, multiple instances do not share those counters, so treat them as best-effort safeguards rather than a global quota. This free Vercel deployment does not include a persistent shared rate limiter or paid firewall rate-limiting rules; it is suitable as a small public demo, not a high-traffic service.
+
+For Vercel deployments, set `TRUST_REVERSE_PROXY=true` and `TRUSTED_PROXY_COUNT=1` so application-level limits use the visitor IP. Vercel documents that it overwrites `X-Forwarded-For` and forwards the public client IP to functions, which prevents callers from spoofing that header at Vercel's edge; see [Vercel request headers](https://vercel.com/docs/headers/request-headers). For other hosting, only trust forwarded headers when the app cannot be reached directly and the proxy chain is configured correctly.
 
 For a single Nginx proxy, set `TRUST_REVERSE_PROXY=true` and `TRUSTED_PROXY_COUNT=1`, and use `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`. If Cloudflare is in front of Nginx and both hops are represented in the header, set the count to `2`. Restrict network access so clients cannot reach the application directly; otherwise they can forge this header.
 

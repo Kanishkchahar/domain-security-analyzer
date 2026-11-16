@@ -59,6 +59,28 @@ docker run --rm --name domain-security-analyzer \
 
 The default Docker build runs the test suite before creating the runtime image. For another host port, change the left side of the port mapping, for example <code>127.0.0.1:9000:8000</code>. The loopback binding keeps the service local to your computer.
 
+## Deploy to Vercel
+
+The public demo is available at <https://domain-security-analyzer.vercel.app>. Visitors can run the standard DNS, email, TLS, and web checks without creating an account or entering an API key. Active TCP port scans and expanded directory scans are disabled on this deployment.
+
+This repository is configured for Vercel’s Python runtime and FastAPI entrypoint. For your own public deployment, do not set `DNS_ANALYZER_API_KEYS` if you want visitors to scan without a shared key. Set `ENABLE_ACTIVE_PORT_SCAN=false` and `ENABLE_WIDE_DIRECTORY_SCAN=false`, and use conservative rate limits. This free deployment uses in-memory, per-instance limits, so they are best-effort rather than a global quota. See the [deployment and privacy notes](docs/DEPLOYMENT.md) before making an instance public.
+
+Deploy from the project root with the Vercel CLI:
+
+```bash
+npm install --global vercel
+vercel login
+vercel
+```
+
+The first `vercel` deployment links this checkout to the selected Vercel project; Vercel may assign that first deployment to Production. Later `vercel` deployments create previews. After verifying a preview, publish it with:
+
+```bash
+vercel --prod
+```
+
+The app’s standard DNS, HTTP, and TLS checks run in the Vercel Function. Optional Nmap service identification and `ffuf` directory discovery require system executables that are installed in the Docker image but are not included in this Vercel deployment. Vercel instances are ephemeral, so in-memory caches and rate limits are best-effort and browser history remains in each user’s browser.
+
 ## What it checks
 
 | Area | Examples |
@@ -97,7 +119,7 @@ See the [API guide](docs/API.md) for other endpoints and the [scan guide](docs/s
 
 - Standard checks use public DNS and make bounded requests to related public services, including Certificate Transparency, RDAP, and RIPEstat. See [deployment and privacy notes](docs/DEPLOYMENT.md) for the outbound request details.
 - Active TCP and expanded directory checks have separate server-side controls. Only run them against systems you are permitted to assess; the dashboard also asks you to confirm authorization.
-- For a publicly reachable deployment, configure API keys and rate limits and put the app behind an authenticated reverse proxy. See the [deployment guide](docs/DEPLOYMENT.md).
+- For a publicly reachable deployment, either require API keys or make an explicit public-access choice with conservative rate limits and optional checks disabled. In-memory limits are best-effort on serverless platforms. See the [deployment guide](docs/DEPLOYMENT.md).
 - Browser scan history is stored in that browser. Short-lived scan caches and rate limits are held in the server process.
 - DNSSEC chain validation is optional and informational. TLS checks sample protocol support and are not an exhaustive cipher or vulnerability audit. Certificate Transparency discovery is not a complete asset inventory.
 - A possible takeover match is a candidate that needs manual verification. A scan result cannot prove that a domain is free of vulnerabilities.
