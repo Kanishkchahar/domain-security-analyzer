@@ -258,7 +258,7 @@ dependencies = [
 requires-dist = [
     { name = "cryptography", specifier = ">=42.0.0,<51.0.0" },
     { name = "defusedxml", specifier = ">=0.7.1,<1.0.0" },
-    { name = "dnspython", specifier = ">=2.6.0,<3.0.0" },
+    { name = "dnspython", specifier = ">=2.9.2,<3.0.0" },
     { name = "fastapi", specifier = ">=0.110.0,<1.0.0" },
     { name = "httpcore", specifier = ">=1.0.0,<2.0.0" },
     { name = "httpx", specifier = ">=0.27.0,<1.0.0" },

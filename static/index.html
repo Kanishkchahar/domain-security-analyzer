@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 22 22'><circle cx='11' cy='11' r='10' stroke='%23F38020' stroke-width='1.5' fill='none'/><path d='M11 1C11 1 7 6 7 11s4 10 4 10' stroke='%23F38020' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M11 1C11 1 15 6 15 11s-4 10-4 10' stroke='%23F38020' stroke-width='1.5' stroke-linecap='round' fill='none'/><path d='M1.5 11h19' stroke='%23F38020' stroke-width='1.5' stroke-linecap='round'/></svg>" />
 
-  <link rel="stylesheet" href="/static/style.css?v=2.2.0.18" />
+  <link rel="stylesheet" href="/static/style.css?v=2.2.0.27" />
 </head>
 <body>
 
@@ -51,19 +51,27 @@
 
     <!-- ── Hero / Input ── -->
     <section class="hero" aria-labelledby="hero-title">
-      <h1 class="hero-title" id="hero-title">Domain Security<br>Analyzer</h1>
+      <div class="hero-badge">
+        <span class="hero-badge-dot" aria-hidden="true"></span>
+        <span class="hero-badge-text">External domain security assessment</span>
+      </div>
+      <h1 class="hero-title" id="hero-title">Know your domain’s<br><span class="hero-title-accent">security posture.</span></h1>
       <p class="hero-sub">
-        Assess DNS, email security, TLS, subdomains, and authorized network exposure. Scan one domain or compare up to eight.
+        Check DNS, email authentication, TLS, and exposed subdomains in one clear report. Start with one domain or compare up to eight.
       </p>
 
       <div class="input-row" role="search">
         <label for="domain-input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Domain name</label>
         <div class="input-wrapper">
+          <svg class="input-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" />
+            <path d="M10.5 10.5L14 14" stroke-linecap="round" />
+          </svg>
           <input
             id="domain-input"
-            class="domain-input"
+            class="domain-input has-search-icon"
             type="text"
-            placeholder="example.com, example.org or https://example.com/path"
+            placeholder="example.com or https://example.com"
             autocomplete="off"
             autocorrect="off"
             autocapitalize="none"
@@ -77,11 +85,19 @@
           id="analyze-btn"
           class="btn-analyze"
           type="button"
-            aria-label="Run domain security analysis"
+          aria-label="Run domain security analysis"
         >
           <div class="spinner" aria-hidden="true"></div>
+          <svg class="btn-analyze-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="8" cy="8" r="6"/>
+            <path d="M8 5v3.5l2 1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           <span class="btn-text">Analyze</span>
         </button>
+      </div>
+
+      <div class="input-helper-row">
+        <span class="helper-hint"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="7"/><path d="M8 7v4M8 5.2v.2" stroke-linecap="round"/></svg> Separate domains with commas to compare them side by side.</span>
       </div>
 
       <details class="api-access-details">
@@ -144,30 +160,169 @@
     </section>
 
     <section class="idle-overview" aria-labelledby="idle-overview-title">
-      <div class="idle-overview-heading">
-        <p class="idle-eyebrow">DOMAIN SECURITY · AT A GLANCE</p>
-        <h2 id="idle-overview-title">One scan. A clearer security picture.</h2>
-        <p>Review the public signals that shape your domain’s security posture, then open the findings for evidence and next steps.</p>
+      <!-- Trust & Scale Strip -->
+      <div class="idle-stats-strip">
+        <div class="idle-stat-item">
+          <span class="idle-stat-number">DNS</span>
+          <span class="idle-stat-label">Records &amp; DNSSEC</span>
+        </div>
+        <div class="idle-stat-divider" aria-hidden="true"></div>
+        <div class="idle-stat-item">
+          <span class="idle-stat-number">Email</span>
+          <span class="idle-stat-label">SPF, DMARC &amp; DKIM</span>
+        </div>
+        <div class="idle-stat-divider" aria-hidden="true"></div>
+        <div class="idle-stat-item">
+          <span class="idle-stat-number">Web</span>
+          <span class="idle-stat-label">TLS &amp; security headers</span>
+        </div>
+        <div class="idle-stat-divider" aria-hidden="true"></div>
+        <div class="idle-stat-item">
+          <span class="idle-stat-number">Exposure</span>
+          <span class="idle-stat-label">Subdomains &amp; takeovers</span>
+        </div>
       </div>
+
+      <!-- Feature Matrix -->
+      <div class="idle-overview-heading">
+        <p class="idle-eyebrow">WHAT’S INCLUDED</p>
+        <h2 id="idle-overview-title">The signals that shape your domain’s security.</h2>
+        <p>Review the checks in one place, then use evidence and practical guidance to decide what to fix.</p>
+      </div>
+
       <div class="idle-capability-grid">
         <article class="idle-capability">
-          <span class="idle-capability-index">01</span>
-          <div><h3>DNS &amp; infrastructure</h3><p>Records, delegation, DNSSEC, and reachability.</p></div>
+          <div class="idle-capability-head">
+            <span class="idle-capability-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </span>
+            <span class="idle-capability-index">01</span>
+          </div>
+          <div class="idle-capability-body">
+            <h3>DNS &amp; DNSSEC</h3>
+            <p>Review records, nameserver delegation, DNSSEC validation, zone transfer exposure, and configuration issues.</p>
+            <div class="idle-pill-tags">
+              <span>DNS records</span>
+              <span>DNSSEC</span>
+              <span>Nameservers</span>
+            </div>
+          </div>
         </article>
+
         <article class="idle-capability">
-          <span class="idle-capability-index">02</span>
-          <div><h3>Email protection</h3><p>SPF, DMARC, and discovered DKIM selectors.</p></div>
+          <div class="idle-capability-head">
+            <span class="idle-capability-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+            <span class="idle-capability-index">02</span>
+          </div>
+          <div class="idle-capability-body">
+            <h3>Email authentication</h3>
+            <p>Check SPF, DMARC, DKIM, and related policies that help protect your domain from email spoofing.</p>
+            <div class="idle-pill-tags">
+              <span>SPF</span>
+              <span>DMARC</span>
+              <span>DKIM</span>
+              <span>BIMI</span>
+            </div>
+          </div>
         </article>
+
         <article class="idle-capability">
-          <span class="idle-capability-index">03</span>
-          <div><h3>Web &amp; TLS</h3><p>HTTPS, certificate, and selected security headers.</p></div>
+          <div class="idle-capability-head">
+            <span class="idle-capability-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <span class="idle-capability-index">03</span>
+          </div>
+          <div class="idle-capability-body">
+            <h3>Website &amp; TLS</h3>
+            <p>Inspect HTTPS certificates, supported TLS settings, security headers, and published security contact details.</p>
+            <div class="idle-pill-tags">
+              <span>TLS</span>
+              <span>Certificates</span>
+              <span>Security headers</span>
+            </div>
+          </div>
         </article>
+
         <article class="idle-capability">
-          <span class="idle-capability-index">04</span>
-          <div><h3>Exposure &amp; next steps</h3><p>Subdomain inventory, findings, and practical fix guidance.</p></div>
+          <div class="idle-capability-head">
+            <span class="idle-capability-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <span class="idle-capability-index">04</span>
+          </div>
+          <div class="idle-capability-body">
+            <h3>Subdomains &amp; fixes</h3>
+            <p>Explore public subdomain signals, check for common takeover risks, and get actionable remediation guidance.</p>
+            <div class="idle-pill-tags">
+              <span>Subdomains</span>
+              <span>Takeover checks</span>
+              <span>Remediation</span>
+              <span>Export</span>
+            </div>
+          </div>
         </article>
       </div>
-      <p class="idle-scope-note"><span aria-hidden="true"></span> Public checks run first. Optional active network checks are clearly scoped and require authorization.</p>
+
+      <!-- How it works 3-step section -->
+      <div class="idle-workflow-section">
+        <div class="idle-workflow-heading">
+          <span class="idle-eyebrow">WORKFLOW</span>
+          <h3>How a scan works</h3>
+        </div>
+        <div class="idle-workflow-steps">
+          <div class="idle-workflow-step">
+            <div class="idle-step-badge">1</div>
+            <div class="idle-step-content">
+              <h4>Enter a domain</h4>
+              <p>Submit one domain or a short list to compare several domains side by side.</p>
+            </div>
+          </div>
+          <div class="idle-workflow-connector" aria-hidden="true"></div>
+          <div class="idle-workflow-step">
+            <div class="idle-step-badge">2</div>
+            <div class="idle-step-content">
+              <h4>Review public signals</h4>
+              <p>The analyzer checks public DNS, email policies, certificates, and selected web settings.</p>
+            </div>
+          </div>
+          <div class="idle-workflow-connector" aria-hidden="true"></div>
+          <div class="idle-workflow-step">
+            <div class="idle-step-badge">3</div>
+            <div class="idle-step-content">
+              <h4>Prioritize next steps</h4>
+              <p>Use the score, evidence, and suggested fixes to decide what needs attention.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privacy & Scope Commitment Banner -->
+      <div class="idle-scope-banner">
+        <div class="idle-scope-banner-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div class="idle-scope-banner-text">
+          <strong>Public checks by default.</strong> The standard report reviews public DNS, certificates, and web settings. Optional active network checks are separate and require authorization.
+        </div>
+      </div>
     </section>
 
     <section id="multi-domain-dashboard" class="multi-domain-dashboard" aria-labelledby="multi-domain-title" aria-live="polite">
@@ -255,22 +410,22 @@
               <div id="score-breakdown-content"></div>
             </details>
             <div class="bento-hero-badges">
-              <div class="badge badge-errors" id="badge-errors">
+              <button class="badge badge-errors" id="badge-errors" type="button" aria-pressed="false" aria-label="Filter findings by errors">
                 <span class="count" id="count-errors">0</span>
                 <span class="label">Errors</span>
-              </div>
-              <div class="badge badge-warnings" id="badge-warnings">
+              </button>
+              <button class="badge badge-warnings" id="badge-warnings" type="button" aria-pressed="false" aria-label="Filter findings by warnings">
                 <span class="count" id="count-warnings">0</span>
                 <span class="label">Warnings</span>
-              </div>
-              <div class="badge badge-info" id="badge-info">
+              </button>
+              <button class="badge badge-info" id="badge-info" type="button" aria-pressed="false" aria-label="Filter findings by informational findings">
                 <span class="count" id="count-info">0</span>
                 <span class="label">Info</span>
-              </div>
-              <div class="badge badge-inconclusive" id="badge-inconclusive">
+              </button>
+              <button class="badge badge-inconclusive" id="badge-inconclusive" type="button" aria-pressed="false" aria-label="Filter findings by checks that could not be verified">
                 <span class="count" id="count-inconclusive">0</span>
                 <span class="label">Could not verify</span>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -442,7 +597,7 @@
       <!-- Panel 5: Passive Subdomain Inventory -->
       <div class="results-tab-panel" id="panel-subdomains" data-segment="subdomains" role="tabpanel" aria-labelledby="tab-subdomains">
         <div id="subdomains-section" class="subdomains-section" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+          <div class="subdomains-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
             <div>
               <h2 class="section-title" style="margin-bottom:4px;"><svg class="heading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9Z"/></svg>Passive Subdomain Footprint</h2>
               <p class="remediation-sub">Discovered via public Certificate Transparency (CT) logs. Zero packets transmitted to target hosts.</p>
@@ -461,7 +616,7 @@
             <input type="text" id="subdomain-filter-input" placeholder="🔍 Filter subdomains (e.g. student, mail, 103...)" class="port-scan-auth-input" style="max-width:280px; padding:6px 10px; font-size:12px;" />
             <span id="subdomain-filter-stats" style="font-size:12px; color:var(--text-muted);"></span>
           </div>
-          <div id="subdomains-list" class="subdomains-table-container"></div>
+          <div id="subdomains-list"></div>
         </div>
       </div>
 
@@ -759,6 +914,6 @@
   <!-- Toast notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="/static/app.js?v=2.2.0.7"></script>
+  <script src="/static/app.js?v=2.2.0.9"></script>
 </body>
 </html>

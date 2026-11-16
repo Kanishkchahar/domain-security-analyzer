@@ -115,6 +115,22 @@ fi
 
 PYTHON="venv/bin/python"
 
+# Repair shebang paths if directory was renamed or moved
+if [ -d "venv/bin" ]; then
+  CURRENT_PY="$(cd venv/bin && pwd)/python"
+  for script in venv/bin/*; do
+    if [ -f "$script" ] && [ -x "$script" ]; then
+      # Check if first two bytes are #! without reading entire binary
+      if [ "$(head -c 2 "$script" 2>/dev/null)" = "#!" ]; then
+        FIRST_LINE="$(head -n 1 "$script" 2>/dev/null || true)"
+        if [[ "$FIRST_LINE" =~ ^#!.*python ]] && [[ "$FIRST_LINE" != "#!${CURRENT_PY}"* ]] && [[ "$FIRST_LINE" != "#!/usr"* ]]; then
+          sed -i "1s|^#!.*python[0-9.]*|#!${CURRENT_PY}|" "$script" 2>/dev/null || true
+        fi
+      fi
+    fi
+  done
+fi
+
 # ── 3. Check / install dependencies ───────────────────────────
 if ! "$PYTHON" -c 'import fastapi, uvicorn, dns.resolver, jinja2, pytest' &>/dev/null; then
   NEED_PIP_INSTALL=true

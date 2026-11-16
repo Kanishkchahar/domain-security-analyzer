@@ -778,6 +778,8 @@ document.getElementById("clear-multi-domain")?.addEventListener("click", () => {
 function setLoading(on) {
   analyzeBtn.disabled = on;
   analyzeBtn.classList.toggle("loading", on);
+  const analyzeLabel = analyzeBtn.querySelector(".btn-text");
+  if (analyzeLabel) analyzeLabel.textContent = on ? "Scanning" : "Analyze";
   domainInput.classList.remove("input-error");
   document.querySelector(".hero")?.setAttribute("aria-busy", String(on));
   document.body.classList.toggle("results-scanning", on);
@@ -1629,6 +1631,10 @@ function applyFindingsFilter(filter) {
   badgeWarnings.classList.toggle("active-filter", filter === "warning");
   badgeInfo.classList.toggle("active-filter", filter === "info");
   badgeInconclusive.classList.toggle("active-filter", filter === "inconclusive");
+  badgeErrors.setAttribute("aria-pressed", String(filter === "error"));
+  badgeWarnings.setAttribute("aria-pressed", String(filter === "warning"));
+  badgeInfo.setAttribute("aria-pressed", String(filter === "info"));
+  badgeInconclusive.setAttribute("aria-pressed", String(filter === "inconclusive"));
 
   renderFindingsList();
 }
@@ -1684,8 +1690,10 @@ function renderFinding(f) {
       <span class="finding-rtype">${escapeHtml(f.record_type)}</span>
       <code class="finding-code">${escapeHtml(f.code || "GEN-001")}</code>
     </div>
-    <div class="finding-msg">${msgHtml}</div>
-    ${f.explanation ? `<details class="finding-guidance"><summary>${escapeHtml(f.explanation.title || "What this means and what to do")}</summary><p>${escapeHtml(f.explanation.why || "")}</p><p><strong>How it could be abused:</strong> ${escapeHtml(f.explanation.attacker || "")}</p><p><strong>Suggested fix:</strong> ${escapeHtml(f.explanation.fix || "")}</p><small>${escapeHtml(f.explanation.technical || "")}${f.explanation.reference ? ` · ${escapeHtml(f.explanation.reference)}` : ""}</small></details>` : ""}
+    <div class="finding-content">
+      <div class="finding-msg">${msgHtml}</div>
+      ${f.explanation ? `<details class="finding-guidance"><summary>${escapeHtml(f.explanation.title || "What this means and what to do")}</summary><p>${escapeHtml(f.explanation.why || "")}</p><p><strong>How it could be abused:</strong> ${escapeHtml(f.explanation.attacker || "")}</p><p><strong>Suggested fix:</strong> ${escapeHtml(f.explanation.fix || "")}</p><small>${escapeHtml(f.explanation.technical || "")}${f.explanation.reference ? ` · ${escapeHtml(f.explanation.reference)}` : ""}</small></details>` : ""}
+    </div>
   `;
   const fixes = (currentScanData?.remediation || []).filter((fix) => {
     const type = String(fix.record_type || "").toUpperCase();
@@ -1710,7 +1718,7 @@ function renderFinding(f) {
       if (!fix.guidance_only && fix.value) item.appendChild(makeCopyBlock(fix.value));
       drawer.appendChild(item);
     });
-    div.appendChild(drawer);
+    div.querySelector(".finding-content")?.appendChild(drawer);
   }
   return div;
 }
@@ -2832,16 +2840,16 @@ function renderSubdomains(subData) {
 
       return `
         <tr>
-          <td style="font-family:'Geist Mono', monospace; font-weight:600; color:var(--text-primary);">
+          <td data-label="Subdomain" style="font-family:'Geist Mono', monospace; font-weight:600; color:var(--text-primary);">
             ${escapeHtml(s.subdomain)}${sourceBadge}
           </td>
-          <td style="font-family:'Geist Mono', monospace; font-size:12px;">${escapedIps || '<span style="color:var(--text-muted)">None</span>'}</td>
-          <td style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--text-muted);">${escapeHtml(s.cname || "—")}</td>
-          <td>${(s.risk_tags || []).map(tag => `<span class="pill pill-warn">${escapeHtml(tag)}</span>`).join(" ") || "—"}</td>
-          <td>${escapeHtml(s.first_seen || "Not reported")}</td>
-          <td>${escapeHtml(takeoverStatus)}</td>
-          <td>${statusPill}</td>
-          <td style="white-space:nowrap;">
+          <td data-label="Resolved IPs" style="font-family:'Geist Mono', monospace; font-size:12px;">${escapedIps || '<span style="color:var(--text-muted)">None</span>'}</td>
+          <td data-label="CNAME" style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--text-muted);">${escapeHtml(s.cname || "—")}</td>
+          <td data-label="Risk tags">${(s.risk_tags || []).map(tag => `<span class="pill pill-warn">${escapeHtml(tag)}</span>`).join(" ") || "—"}</td>
+          <td data-label="First seen">${escapeHtml(s.first_seen || "Not reported")}</td>
+          <td data-label="Takeover">${escapeHtml(takeoverStatus)}</td>
+          <td data-label="Status">${statusPill}</td>
+          <td data-label="Actions" style="white-space:nowrap;">
             <div style="display:flex; gap:6px; align-items:center;">
               <button class="btn btn-secondary btn-add-scope" data-host="${escapeHtml(s.subdomain)}" style="padding:3px 8px; font-size:11px;" type="button" title="Add to target scope list">
                 + Scope
@@ -2858,7 +2866,8 @@ function renderSubdomains(subData) {
 
   let tableHtml = `
     ${wildcardsBanner}
-    <div class="records-table-container" style="margin-top:14px;">
+    <p class="subdomain-table-hint" id="subdomains-table-hint">On small screens, each host is shown as a stack of labeled fields.</p>
+    <div class="records-table-container subdomain-table-container" role="region" tabindex="0" aria-label="Subdomain inventory" aria-describedby="subdomains-table-hint" style="margin-top:14px;">
       <table class="records-table">
         <thead>
           <tr>
