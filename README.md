@@ -1,154 +1,144 @@
 # Domain Security Analyzer
 
 [![CI](https://github.com/Kanishkchahar/domain-security-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/Kanishkchahar/domain-security-analyzer/actions/workflows/ci.yml)
+[![Docker Hub](https://img.shields.io/docker/v/kanishkchahar/domain-security-analyzer?sort=semver)](https://hub.docker.com/r/kanishkchahar/domain-security-analyzer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Domain Security Analyzer assesses public DNS, email authentication, DNSSEC delegation, TLS and selected web settings, subdomain inventory, and known CNAME takeover indicators. It provides a browser dashboard, Python CLI, JSON API, bounded network diagnostics, and offline HTML reports.
+A self-hosted dashboard and command-line tool for reviewing a domain’s public DNS, email, DNSSEC, TLS, web security, and subdomain signals. It brings findings, evidence, scan coverage, and suggested DNS fixes together in one report.
 
-Results are point-in-time observations. They are not a penetration test or a guarantee that a domain is secure. See the [scan guide](docs/scan.md) for check details and limits.
-
-![Domain Security Analyzer dashboard](docs/images/dashboard.png)
+**Use it only for domains and systems you own or are authorized to assess.** Results are point-in-time observations, not a penetration test or a guarantee of security.
 
 ## Screenshots
 
-Scroll the gallery horizontally to browse the scan views. Select a preview to open its full-size screenshot.
+These screenshots show the landing page and the main report sections. Select an image to open it at full size.
 
 <table>
   <tr>
-    <td><a href="docs/images/screenshots/scan-01.jpg"><img src="docs/images/screenshots/scan-01-preview.jpg" alt="Domain Security Analyzer scan view 1" width="280"></a><br><strong>Scan view 1</strong></td>
-    <td><a href="docs/images/screenshots/scan-02.jpg"><img src="docs/images/screenshots/scan-02-preview.jpg" alt="Domain Security Analyzer scan view 2" width="280"></a><br><strong>Scan view 2</strong></td>
-    <td><a href="docs/images/screenshots/scan-03.jpg"><img src="docs/images/screenshots/scan-03-preview.jpg" alt="Domain Security Analyzer scan view 3" width="280"></a><br><strong>Scan view 3</strong></td>
-    <td><a href="docs/images/screenshots/scan-04.jpg"><img src="docs/images/screenshots/scan-04-preview.jpg" alt="Domain Security Analyzer scan view 4" width="280"></a><br><strong>Scan view 4</strong></td>
-    <td><a href="docs/images/screenshots/scan-05.jpg"><img src="docs/images/screenshots/scan-05-preview.jpg" alt="Domain Security Analyzer scan view 5" width="280"></a><br><strong>Scan view 5</strong></td>
+    <td align="center"><a href="screenshots/01-landing.png"><img src="screenshots/01-landing.png" width="480" alt="Domain Security Analyzer landing page"></a><br><strong>Landing page</strong></td>
+    <td align="center"><a href="screenshots/02-overview.png"><img src="screenshots/02-overview.png" width="480" alt="Scan overview and domain security grade"></a><br><strong>Scan overview</strong></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="screenshots/03-findings.png"><img src="screenshots/03-findings.png" width="480" alt="Diagnostic findings with severity and evidence"></a><br><strong>Findings</strong></td>
+    <td align="center"><a href="screenshots/04-dns.png"><img src="screenshots/04-dns.png" width="480" alt="DNS records and authoritative DNS checks"></a><br><strong>DNS records</strong></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="screenshots/05-email.png"><img src="screenshots/05-email.png" width="480" alt="Email authentication and policy results"></a><br><strong>Email security</strong></td>
+    <td align="center"><a href="screenshots/06-security.png"><img src="screenshots/06-security.png" width="480" alt="DNSSEC, takeover, and domain security checks"></a><br><strong>Security checks</strong></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="screenshots/07-web-tls.png"><img src="screenshots/07-web-tls.png" width="480" alt="TLS certificate, protocol, and web header results"></a><br><strong>Web and TLS</strong></td>
+    <td align="center"><a href="screenshots/08-subdomains.png"><img src="screenshots/08-subdomains.png" width="480" alt="Passive subdomain inventory and status"></a><br><strong>Subdomains</strong></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="screenshots/09-network.png"><img src="screenshots/09-network.png" width="480" alt="Authorized network scope and web exposure checks"></a><br><strong>Network checks</strong></td>
+    <td align="center"><a href="screenshots/10-fixes.png"><img src="screenshots/10-fixes.png" width="480" alt="Reviewable DNS fix drafts and provider guidance"></a><br><strong>Fix drafts</strong></td>
   </tr>
 </table>
 
 ## Run locally
 
-Requirements: Python 3.11 or newer.
+**Requirements:** Python 3.11 or newer, with the venv and pip modules available.
+
+Clone the repository and start the app:
 
 ```bash
+git clone https://github.com/Kanishkchahar/domain-security-analyzer.git
+cd domain-security-analyzer
 bash run.sh
 ```
 
-Open <http://127.0.0.1:8000>. The runner prepares `venv/` and starts the server on loopback. Use `bash run.sh 9000` to choose another port, `bash run.sh --setup-only` to prepare without starting, or `bash run.sh --test` to run the test suite.
+The runner creates a local virtual environment and installs the application dependencies on the first launch. Then open <http://127.0.0.1:8000>. Press Ctrl+C in the terminal to stop the server.
 
-To run with Docker:
-
-```bash
-docker build -t domain-security-analyzer .
-docker run --rm -p 8000:8000 domain-security-analyzer
-```
-
-The local runner binds to `127.0.0.1`. The Docker image listens on `0.0.0.0` inside the container; Docker's published port controls host exposure. For network or public deployment, review [deployment and privacy notes](docs/DEPLOYMENT.md) and put an authenticated, rate-limited proxy in front of the app.
-
-To publish the image to GitHub Container Registry (GHCR), first authenticate with a GitHub token that has package write access, then tag and push it:
+To use a different port, pass it to the runner:
 
 ```bash
-docker login ghcr.io --username Kanishkchahar
-docker build -t ghcr.io/kanishkchahar/domain-security-analyzer:2.2.0 .
-docker push ghcr.io/kanishkchahar/domain-security-analyzer:2.2.0
+bash run.sh 9000
 ```
 
-Docker prompts for the token during `docker login`; do not put it directly in shell history. The registry package visibility can be changed in GitHub after the first push.
+On Debian or Ubuntu, install the Python venv package if your Python installation does not include it: <code>sudo apt install python3-venv</code>. Nmap is optional for the additional service-identification mode.
+
+## Run with Docker Hub
+
+Docker must be installed and running. Pull the published version and start it on your own machine:
+
+```bash
+docker pull kanishkchahar/domain-security-analyzer:2.2.0
+docker run --rm --name domain-security-analyzer \
+  -p 127.0.0.1:8000:8000 \
+  kanishkchahar/domain-security-analyzer:2.2.0
+```
+
+Open <http://127.0.0.1:8000>. Press Ctrl+C to stop and remove the container. To use the latest published image, replace the version tag with <code>latest</code>. The image is available on [Docker Hub](https://hub.docker.com/r/kanishkchahar/domain-security-analyzer).
+
+To build and run the image from a local checkout instead:
+
+```bash
+docker build -t domain-security-analyzer:local .
+docker run --rm --name domain-security-analyzer \
+  -p 127.0.0.1:8000:8000 \
+  domain-security-analyzer:local
+```
+
+The default Docker build runs the test suite before creating the runtime image. For another host port, change the left side of the port mapping, for example <code>127.0.0.1:9000:8000</code>. The loopback binding keeps the service local to your computer.
 
 ## What it checks
 
-- **DNS:** A, AAAA, MX, NS, TXT, CNAME, SOA, and CAA records; zone-apex discovery; selected DNS configuration checks.
-- **Email:** SPF parsing and lookup limits, DMARC, common and custom DKIM selectors, MTA-STS, TLS-RPT, and BIMI.
-- **DNS security:** DS-to-DNSKEY comparison, optional DNSSEC chain evidence, AXFR exposure, wildcard DNS, nameserver consistency, and CNAME takeover indicators.
-- **Web and inventory:** TLS certificate and protocol checks, selected HTTP security headers, subdomains from crt.sh and SSLMate Cert Spotter, and optional bounded path or Nmap service checks.
-- **Additional checks:** RDAP registration expiry, RIPEstat RPKI route status, TLSA record discovery, and SMTP STARTTLS negotiation.
-- **Extending checks:** Independent checks are registered through Python entry points in the `dns_analyzer.checks` group. See [plugin checks](docs/scan.md#check-plugins).
-- **Reverse proxy rate limits:** See [proxy trust configuration](docs/DEPLOYMENT.md#environment-variables), including `TRUSTED_PROXY_COUNT` for multi-hop proxies.
-- **Results:** coverage states, finding explanations, draft remediations, BIND export, browser-local comparison history, and downloadable reports.
+| Area | Examples |
+|---|---|
+| DNS | A, AAAA, MX, NS, TXT, CNAME, SOA and CAA records; DNSSEC delegation; nameserver consistency; wildcard DNS; zone-transfer exposure |
+| Email | SPF, DMARC, DKIM, MTA-STS, TLS-RPT, BIMI, SMTP STARTTLS and mail-server reputation |
+| Web and TLS | Certificates, negotiated TLS, protocol support, HTTP security headers, cookies and selected methods |
+| Subdomains | Passive Certificate Transparency inventory and potential dangling CNAMEs |
+| Network | DNS resolution, selected website paths and bounded TCP service checks |
+| Reports | Findings and evidence, scan coverage, score explanation, suggested DNS changes, BIND export, JSON, SARIF and downloadable HTML |
 
-The overall grade is a rule-based summary, not a probability of compromise. It shows incomplete checks, excluded factors, and applied score caps. Missing IPv4 or IPv6 alone does not lower the address-resolution score when the other family resolves. See [score and status interpretation](docs/scan.md#scores-findings-and-remediation).
+The score is a rule-based summary. The report shows incomplete checks and warnings so a grade is not mistaken for certainty. Some checks can be inconclusive when a service or data source does not respond.
 
-See the [changelog](CHANGELOG.md) for release-specific changes to scoring and incomplete-grade reporting.
+## CLI and API
 
-## CLI
-
-The package and primary command are named `domain-security-analyzer`. The previous `dns-analyzer` command remains as a compatibility alias.
+The CLI uses the same scan pipeline as the dashboard:
 
 ```bash
 bash run.sh --setup-only
 ./venv/bin/domain-security-analyzer example.com
 ./venv/bin/domain-security-analyzer example.com --json
 ./venv/bin/domain-security-analyzer example.com --sarif > findings.sarif
-./venv/bin/domain-security-analyzer example.com --min-grade B --require-complete
 ```
 
-`--json` and `--sarif` are mutually exclusive. `--min-grade` compares the base grade; `--require-complete` rejects provisional grades. Exit codes are 0 for success, 1 for invalid input or tool failure, 2 for a grade below threshold, 3 for error findings, and 4 for an incomplete grade when completeness is required. Error findings take precedence over grade results.
+The main JSON endpoint is <code>POST /api/analyze</code>:
 
-For GitHub Code Scanning, write SARIF to a file and upload it with GitHub's SARIF upload action. The CLI can exit nonzero when findings are present, so configure the scan step to continue and upload the SARIF file in a following step.
-
-## API
-
-The main endpoint is `POST /api/analyze` with `{"domain":"example.com"}`. The API also provides custom DKIM checks, subdomain inventory, bounded network diagnostics, offline reports, and a temporary grade badge. See the [API guide](docs/API.md) for routes and examples.
-
-## Deployment notes
-
-- Active port checks are disabled by default and require server-side authorization and target policy.
-- DNSSEC chain validation is opt-in. The default DNSSEC result compares DS and DNSKEY data; it does not validate the full chain to the root.
-- Takeover fingerprints are heuristic. Shipped entries are unverified, so a match is a candidate rather than confirmation.
-- Scan history and short-lived caches are local to the browser or server process. There is no built-in scheduler, account system, or alert delivery.
-- Checks contact the configured DNS resolver, crt.sh, Cert Spotter, IANA RDAP, RIPEstat, and public scan targets as described in [deployment and privacy notes](docs/DEPLOYMENT.md).
-
-## Known limitations
-
-- DNSSEC chain validation is opt-in and informational; authenticated denial proofs are not validated.
-- TLS probing samples protocol versions and is not an exhaustive cipher-suite or vulnerability audit. TLSA records are not validated against DNSSEC or the certificate.
-- RPKI results reflect RIPEstat observations at scan time. Takeover checks remain candidates unless evidence meets the catalog rules; shipped fingerprints are unverified.
-- CT discovery is not an exhaustive asset inventory. RDAP reports expiry only when the registry publishes it; registrar-lock and domain-age checks are not included.
-- Scan history is browser-local. There is no server-side scheduler, account system, or alert delivery.
-- Multi-domain comparison is synchronous and capped at eight domains; the API has no async bulk-job interface or separately documented Python SDK.
-
-See [PROGRESS.md](PROGRESS.md) for the current implementation status and additional gaps.
-
-## Project layout
-
-```text
-app/                  FastAPI routes, scan pipeline, checks, and data
-  checks/             Built-in plugin registrations
-  cli.py              Text, JSON, SARIF, and grade-gate command
-  finding_catalog.py  Stable finding codes and explanations
-  work_budget.py      Shared DNS and HTTP work limits
-static/               Dashboard HTML, CSS, and JavaScript
-tests/                Unit and API integration tests
-docs/                 API, deployment, scan, and presentation guides
-scripts/              Maintainer utilities, including trust-anchor updates
-pyproject.toml        Package metadata and check entry points
-requirements.txt      Runtime dependencies
-requirements-dev.txt  Test and static-analysis tools
-uv.lock               Resolved dependency lock
+```bash
+curl -X POST http://127.0.0.1:8000/api/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{"domain":"example.com"}'
 ```
 
-## Related tools
+See the [API guide](docs/API.md) for other endpoints and the [scan guide](docs/scan.md) for check definitions and interpretation.
 
-These tools cover adjacent use cases; Domain Security Analyzer is not a replacement for specialist diagnostics.
+## Safety, privacy, and limitations
 
-| Tool | Best suited to |
-|---|---|
-| [DNSViz](https://dnsviz.net/) | Visual DNSSEC chain and resolution-path troubleshooting |
-| [Zonemaster](https://zonemaster.net/) | Deep DNS delegation and zone-quality testing |
-| [MXToolbox](https://mxtoolbox.com/) | Integrated DNS, email, blacklist, and SMTP diagnostics |
-| [dnsight](https://pypi.org/project/dnsight/) | Python DNS/email audit CLI and SDK, including SARIF output |
+- Standard checks use public DNS and make bounded requests to related public services, including Certificate Transparency, RDAP, and RIPEstat. See [deployment and privacy notes](docs/DEPLOYMENT.md) for the outbound request details.
+- Active TCP and expanded directory checks have separate server-side controls. Only run them against systems you are permitted to assess; the dashboard also asks you to confirm authorization.
+- For a publicly reachable deployment, configure API keys and rate limits and put the app behind an authenticated reverse proxy. See the [deployment guide](docs/DEPLOYMENT.md).
+- Browser scan history is stored in that browser. Short-lived scan caches and rate limits are held in the server process.
+- DNSSEC chain validation is optional and informational. TLS checks sample protocol support and are not an exhaustive cipher or vulnerability audit. Certificate Transparency discovery is not a complete asset inventory.
+- A possible takeover match is a candidate that needs manual verification. A scan result cannot prove that a domain is free of vulnerabilities.
 
-## Project docs
+## Project documentation
 
-- [Scan guide](docs/scan.md): what each check means and its limitations.
-- [API guide](docs/API.md): endpoints and request examples.
-- [Deployment and privacy](docs/DEPLOYMENT.md): configuration, outbound requests, logging, and work limits.
-- [Finding codes](docs/FINDING_CODES.md): stable codes and legacy aliases.
-- [Presentation guide](docs/PRESENTATION.md): demo outline, architecture, and technical Q&A.
-- [Changelog](CHANGELOG.md) and [design decisions](DECISIONS.md).
+- [Scan guide](docs/scan.md): checks, scores, findings, and limitations.
+- [API guide](docs/API.md): HTTP endpoints and examples.
+- [Deployment and privacy](docs/DEPLOYMENT.md): configuration, authorization, outbound traffic, and operation.
+- [Finding codes](docs/FINDING_CODES.md): stable finding identifiers.
+- [Presentation guide](docs/PRESENTATION.md): demo and architecture notes.
+- [Changelog](CHANGELOG.md) and [progress notes](PROGRESS.md).
 
 ## Development
 
+The default Docker build includes an isolated test stage. To run the tests locally, install the development dependencies and run pytest:
+
 ```bash
-./venv/bin/pytest -q
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+./venv/bin/python -m pytest -q
 ```
-
-The project uses FastAPI, dnspython, Pydantic, Jinja2, and vanilla JavaScript. `uv.lock` and `requirements.lock.txt` pin the production dependency graph and package hashes; Docker installs from the hash-verified export. See `pyproject.toml` and `requirements.txt` for dependency declarations and development tools.
-
-Docker builds run `pytest -q` in an isolated test stage before creating the runtime image. Run that stage alone with `docker build --target test .`; pytest and other development tools are not copied into the runtime image.
