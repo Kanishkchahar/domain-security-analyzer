@@ -1,6 +1,5 @@
 # Domain Security Analyzer
 
-[![CI](https://github.com/Kanishkchahar/domain-security-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/Kanishkchahar/domain-security-analyzer/actions/workflows/ci.yml)
 [![Docker Hub](https://img.shields.io/docker/v/kanishkchahar/domain-security-analyzer?sort=semver)](https://hub.docker.com/r/kanishkchahar/domain-security-analyzer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -10,30 +9,22 @@ A self-hosted dashboard and command-line tool for reviewing a domain’s public 
 
 ## Screenshots
 
-These screenshots show the landing page and the main report sections. Select an image to open it at full size.
+Open an image to view the full-size screenshot.
 
-<table>
-  <tr>
-    <td align="center"><a href="screenshots/01-landing.png"><img src="screenshots/01-landing.png" width="480" alt="Domain Security Analyzer landing page"></a><br><strong>Landing page</strong></td>
-    <td align="center"><a href="screenshots/02-overview.png"><img src="screenshots/02-overview.png" width="480" alt="Scan overview and domain security grade"></a><br><strong>Scan overview</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="screenshots/03-findings.png"><img src="screenshots/03-findings.png" width="480" alt="Diagnostic findings with severity and evidence"></a><br><strong>Findings</strong></td>
-    <td align="center"><a href="screenshots/04-dns.png"><img src="screenshots/04-dns.png" width="480" alt="DNS records and authoritative DNS checks"></a><br><strong>DNS records</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="screenshots/05-email.png"><img src="screenshots/05-email.png" width="480" alt="Email authentication and policy results"></a><br><strong>Email security</strong></td>
-    <td align="center"><a href="screenshots/06-security.png"><img src="screenshots/06-security.png" width="480" alt="DNSSEC, takeover, and domain security checks"></a><br><strong>Security checks</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="screenshots/07-web-tls.png"><img src="screenshots/07-web-tls.png" width="480" alt="TLS certificate, protocol, and web header results"></a><br><strong>Web and TLS</strong></td>
-    <td align="center"><a href="screenshots/08-subdomains.png"><img src="screenshots/08-subdomains.png" width="480" alt="Passive subdomain inventory and status"></a><br><strong>Subdomains</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="screenshots/09-network.png"><img src="screenshots/09-network.png" width="480" alt="Authorized network scope and web exposure checks"></a><br><strong>Network checks</strong></td>
-    <td align="center"><a href="screenshots/10-fixes.png"><img src="screenshots/10-fixes.png" width="480" alt="Reviewable DNS fix drafts and provider guidance"></a><br><strong>Fix drafts</strong></td>
-  </tr>
-</table>
+<details>
+  <summary>View all 10 screenshots</summary>
+
+  <p><strong>Landing page</strong><br><a href="screenshots/01-landing.png"><img src="screenshots/01-landing.png" alt="Domain Security Analyzer landing page"></a></p>
+  <p><strong>Scan overview</strong><br><a href="screenshots/02-overview.png"><img src="screenshots/02-overview.png" alt="Scan overview and domain security grade"></a></p>
+  <p><strong>Findings</strong><br><a href="screenshots/03-findings.png"><img src="screenshots/03-findings.png" alt="Diagnostic findings with severity and evidence"></a></p>
+  <p><strong>DNS records</strong><br><a href="screenshots/04-dns.png"><img src="screenshots/04-dns.png" alt="DNS records and authoritative DNS checks"></a></p>
+  <p><strong>Email security</strong><br><a href="screenshots/05-email.png"><img src="screenshots/05-email.png" alt="Email authentication and policy results"></a></p>
+  <p><strong>Security checks</strong><br><a href="screenshots/06-security.png"><img src="screenshots/06-security.png" alt="DNSSEC, takeover, and domain security checks"></a></p>
+  <p><strong>Web and TLS</strong><br><a href="screenshots/07-web-tls.png"><img src="screenshots/07-web-tls.png" alt="TLS certificate, protocol, and web header results"></a></p>
+  <p><strong>Subdomains</strong><br><a href="screenshots/08-subdomains.png"><img src="screenshots/08-subdomains.png" alt="Passive subdomain inventory and status"></a></p>
+  <p><strong>Network checks</strong><br><a href="screenshots/09-network.png"><img src="screenshots/09-network.png" alt="Authorized network scope and web exposure checks"></a></p>
+  <p><strong>Fix drafts</strong><br><a href="screenshots/10-fixes.png"><img src="screenshots/10-fixes.png" alt="Reviewable DNS fix drafts and provider guidance"></a></p>
+</details>
 
 ## Run locally
 
